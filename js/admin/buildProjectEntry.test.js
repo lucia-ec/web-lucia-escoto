@@ -7,6 +7,9 @@ import {
   buildProjectFromForm,
   formatProjectObjectSource,
   insertProjectIntoSource,
+  findProjectRange,
+  replaceProjectInSource,
+  removeProjectFromSource,
 } from './buildProjectEntry.js';
 
 test('slugify converts a title into a clean kebab-case id', () => {
@@ -102,4 +105,88 @@ test('insertProjectIntoSource throws a clear error if the marker is missing', ()
     () => insertProjectIntoSource('export const projects = [];', 'x'),
     /ANCLA-ADMIN/
   );
+});
+
+const RANGE_FIXTURE = `export const projects = [
+  /* ▲ ANCLA-ADMIN: no borrar esta línea. */
+  {
+    id: 'proyecto-uno',
+    title: 'Uno',
+    description: 'Contiene llaves { y } dentro del texto sin romper nada.',
+  },
+  {
+    id: 'proyecto-dos',
+    /* REEMPLAZAR con la fecha real de publicación */
+    title: 'Dos',
+  },
+  {
+    id: 'proyecto-tres',
+    title: 'Tres',
+  },
+];
+`;
+
+test('findProjectRange encuentra el primer proyecto', () => {
+  const range = findProjectRange(RANGE_FIXTURE, 'proyecto-uno');
+  const block = RANGE_FIXTURE.slice(range.start, range.end);
+  assert.match(block, /id: 'proyecto-uno'/);
+  assert.doesNotMatch(block, /proyecto-dos/);
+});
+
+test('findProjectRange encuentra el proyecto del medio, con llaves en la descripción', () => {
+  const range = findProjectRange(RANGE_FIXTURE, 'proyecto-uno');
+  const block = RANGE_FIXTURE.slice(range.start, range.end);
+  assert.match(block, /Contiene llaves \{ y \} dentro/);
+});
+
+test('findProjectRange encuentra el último proyecto', () => {
+  const range = findProjectRange(RANGE_FIXTURE, 'proyecto-tres');
+  const block = RANGE_FIXTURE.slice(range.start, range.end);
+  assert.match(block, /id: 'proyecto-tres'/);
+});
+
+test('findProjectRange no se descuadra con un comentario de bloque dentro del objeto', () => {
+  const range = findProjectRange(RANGE_FIXTURE, 'proyecto-dos');
+  const block = RANGE_FIXTURE.slice(range.start, range.end);
+  assert.match(block, /id: 'proyecto-dos'/);
+  assert.match(block, /REEMPLAZAR con la fecha real/);
+  assert.doesNotMatch(block, /proyecto-tres/);
+});
+
+test('findProjectRange lanza un error claro si el id no existe', () => {
+  assert.throws(
+    () => findProjectRange(RANGE_FIXTURE, 'no-existe'),
+    /No se encontró el proyecto con id "no-existe"/
+  );
+});
+
+test('replaceProjectInSource sustituye solo el bloque del proyecto indicado', () => {
+  const nuevo = `  {\n    id: 'proyecto-dos',\n    title: 'Dos (editado)',\n  },\n`;
+  const result = replaceProjectInSource(RANGE_FIXTURE, 'proyecto-dos', nuevo);
+  assert.match(result, /title: 'Dos \(editado\)'/);
+  assert.doesNotMatch(result, /REEMPLAZAR con la fecha real/);
+  assert.match(result, /id: 'proyecto-uno'/);
+  assert.match(result, /id: 'proyecto-tres'/);
+  assert.match(result, /ANCLA-ADMIN/);
+});
+
+test('removeProjectFromSource quita el proyecto del medio y deja los demás intactos', () => {
+  const result = removeProjectFromSource(RANGE_FIXTURE, 'proyecto-dos');
+  assert.doesNotMatch(result, /proyecto-dos/);
+  assert.match(result, /id: 'proyecto-uno'/);
+  assert.match(result, /id: 'proyecto-tres'/);
+  assert.doesNotMatch(result, /\n\n\n/);
+});
+
+test('removeProjectFromSource quita el primer proyecto sin dejar una coma suelta', () => {
+  const result = removeProjectFromSource(RANGE_FIXTURE, 'proyecto-uno');
+  assert.doesNotMatch(result, /proyecto-uno/);
+  assert.match(result, /ANCLA-ADMIN/);
+  assert.match(result, /id: 'proyecto-dos'/);
+});
+
+test('removeProjectFromSource quita el último proyecto', () => {
+  const result = removeProjectFromSource(RANGE_FIXTURE, 'proyecto-tres');
+  assert.doesNotMatch(result, /proyecto-tres/);
+  assert.match(result, /id: 'proyecto-dos'/);
 });

@@ -167,3 +167,133 @@ export function insertProjectIntoSource(sourceText, projectObjectSource) {
   lines.splice(markerIndex + 1, 0, projectObjectSource.replace(/\n$/, ''));
   return lines.join('\n');
 }
+
+/**
+ * Recorre el texto fuente una vez y devuelve el rango [start, end] (índices
+ * de carácter, `end` inclusive) de cada bloque `{ ... }` que aparece al
+ * nivel más externo de anidamiento de llaves — que es exactamente el nivel
+ * en el que viven los objetos de proyecto dentro del array `projects`.
+ * Ignora las llaves que aparezcan dentro de literales de cadena (comillas
+ * simples, dobles o backticks, respetando el escape) y dentro de
+ * comentarios (`// ...` y `/* ... */`), para que un `{` o `}` que
+ * aparezca en la descripción de un proyecto no descuadre el conteo.
+ * @param {string} sourceText
+ * @returns {{start: number, end: number}[]}
+ */
+function scanTopLevelObjectRanges(sourceText) {
+  const ranges = [];
+  let depth = 0;
+  let start = -1;
+  let i = 0;
+  const len = sourceText.length;
+
+  while (i < len) {
+    const ch = sourceText[i];
+    const next = sourceText[i + 1];
+
+    if (ch === '/' && next === '/') {
+      i += 2;
+      while (i < len && sourceText[i] !== '\n') i += 1;
+      continue;
+    }
+
+    if (ch === '/' && next === '*') {
+      i += 2;
+      while (i < len && !(sourceText[i] === '*' && sourceText[i + 1] === '/')) {
+        i += 1;
+      }
+      i += 2;
+      continue;
+    }
+
+    if (ch === "'" || ch === '"' || ch === '`') {
+      const quote = ch;
+      i += 1;
+      while (i < len && sourceText[i] !== quote) {
+        if (sourceText[i] === '\\') i += 1;
+        i += 1;
+      }
+      i += 1;
+      continue;
+    }
+
+    if (ch === '{') {
+      if (depth === 0) start = i;
+      depth += 1;
+      i += 1;
+      continue;
+    }
+
+    if (ch === '}') {
+      depth -= 1;
+      if (depth === 0 && start !== -1) {
+        ranges.push({ start, end: i });
+        start = -1;
+      }
+      i += 1;
+      continue;
+    }
+
+    i += 1;
+  }
+
+  return ranges;
+}
+
+/**
+ * Encuentra el rango de texto que ocupa el objeto de un proyecto por su
+ * `id`, incluyendo la coma final y el salto de línea que le sigue si los
+ * hay (para poder quitar o sustituir el bloque entero de una vez, sin dejar
+ * una coma suelta ni una línea en blanco de más).
+ * @param {string} sourceText
+ * @param {string} id
+ * @returns {{start: number, end: number}}
+ * @throws {Error} si no encuentra un proyecto con ese id.
+ */
+export function findProjectRange(sourceText, id) {
+  const idPattern = new RegExp(`(?:id:\\s*'${id}'|"id":\\s*"${id}")`);
+  const idMatch = idPattern.exec(sourceText);
+  if (!idMatch) {
+    throw new Error(
+      `No se encontró el proyecto con id "${id}". Puede que se haya modificado desde otro sitio; recarga la lista.`
+    );
+  }
+
+  const ranges = scanTopLevelObjectRanges(sourceText);
+  const range = ranges.find(
+    (r) => r.start <= idMatch.index && idMatch.index <= r.end
+  );
+  if (!range) {
+    throw new Error(`No se pudo delimitar el bloque del proyecto con id "${id}".`);
+  }
+
+  let end = range.end + 1;
+  if (sourceText[end] === ',') end += 1;
+  if (sourceText[end] === '\n') end += 1;
+
+  return { start: range.start, end };
+}
+
+/**
+ * Sustituye el bloque de un proyecto existente por un objeto serializado
+ * nuevo (normalmente el resultado de `formatProjectObjectSource`).
+ * @param {string} sourceText
+ * @param {string} id
+ * @param {string} projectObjectSource
+ * @returns {string}
+ */
+export function replaceProjectInSource(sourceText, id, projectObjectSource) {
+  const { start, end } = findProjectRange(sourceText, id);
+  return sourceText.slice(0, start) + projectObjectSource + sourceText.slice(end);
+}
+
+/**
+ * Quita por completo el bloque de un proyecto del texto fuente.
+ * @param {string} sourceText
+ * @param {string} id
+ * @returns {string}
+ */
+export function removeProjectFromSource(sourceText, id) {
+  const { start, end } = findProjectRange(sourceText, id);
+  return sourceText.slice(0, start) + sourceText.slice(end);
+}
