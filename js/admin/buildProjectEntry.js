@@ -175,7 +175,7 @@ export function insertProjectIntoSource(sourceText, projectObjectSource) {
  * en el que viven los objetos de proyecto dentro del array `projects`.
  * Ignora las llaves que aparezcan dentro de literales de cadena (comillas
  * simples, dobles o backticks, respetando el escape) y dentro de
- * comentarios (`// ...` y `/* ... */`), para que un `{` o `}` que
+ * comentarios (de línea y de bloque), para que un `{` o `}` que
  * aparezca en la descripción de un proyecto no descuadre el conteo.
  * @param {string} sourceText
  * @returns {{start: number, end: number}[]}
@@ -267,11 +267,17 @@ export function findProjectRange(sourceText, id) {
     throw new Error(`No se pudo delimitar el bloque del proyecto con id "${id}".`);
   }
 
+  let start = range.start;
+  // Retract start to the beginning of the line (consume leading whitespace)
+  while (start > 0 && sourceText[start - 1] !== '\n') {
+    start -= 1;
+  }
+
   let end = range.end + 1;
   if (sourceText[end] === ',') end += 1;
   if (sourceText[end] === '\n') end += 1;
 
-  return { start: range.start, end };
+  return { start, end };
 }
 
 /**

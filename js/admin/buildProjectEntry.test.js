@@ -190,3 +190,19 @@ test('removeProjectFromSource quita el último proyecto', () => {
   assert.doesNotMatch(result, /proyecto-tres/);
   assert.match(result, /id: 'proyecto-dos'/);
 });
+
+test('removeProjectFromSource mantiene indentación correcta al quitar el primer proyecto', () => {
+  const result = removeProjectFromSource(RANGE_FIXTURE, 'proyecto-uno');
+  // After removing proyecto-uno, proyecto-dos should still have 2-space indentation
+  assert.match(result, /^  \{[\s\S]*id: 'proyecto-dos'/m);
+  // Verify no 4-space indentation from double whitespace
+  assert.doesNotMatch(result, /^    \{[\s\S]*id: 'proyecto-dos'/m);
+});
+
+test('removeProjectFromSource mantiene indentación correcta al quitar el proyecto del medio', () => {
+  const result = removeProjectFromSource(RANGE_FIXTURE, 'proyecto-dos');
+  // After removing proyecto-dos, proyecto-tres should still have 2-space indentation
+  assert.match(result, /^  \{[\s\S]*id: 'proyecto-tres'/m);
+  // Verify no 4-space indentation from double whitespace
+  assert.doesNotMatch(result, /^    \{[\s\S]*id: 'proyecto-tres'/m);
+});
