@@ -81,6 +81,36 @@
   transform: translateY(2px);
 }
 
+/* Peligro: acciones destructivas (confirmar borrado) */
+.btn--danger {
+  background-color: var(--color-danger);
+  color: var(--color-accent-contrast);
+}
+
+.btn--danger:hover {
+  background-color: color-mix(in srgb, var(--color-danger) 85%, black);
+  transform: translateY(-2px);
+}
+
+.btn--danger:active {
+  transform: translateY(0);
+}
+
+/* Éxito: guardar cambios de un proyecto que ya existía */
+.btn--success {
+  background-color: var(--color-success);
+  color: var(--color-accent-contrast);
+}
+
+.btn--success:hover {
+  background-color: color-mix(in srgb, var(--color-success) 85%, black);
+  transform: translateY(-2px);
+}
+
+.btn--success:active {
+  transform: translateY(0);
+}
+
 /* Terciario: solo texto, para acciones de baja jerarquía */
 .btn--quiet {
   padding-inline: var(--space-2xs);
