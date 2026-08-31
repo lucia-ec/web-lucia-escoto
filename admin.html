@@ -47,17 +47,50 @@
         </form>
       </section>
 
-      <!-- Paso 2: formulario del proyecto. Se guarda directamente en disco
-           a través del servidor local (scripts/admin-server.py), que exige
-           el hash de la frase de paso en cada petición de escritura. -->
-      <section
-        class="admin-card admin-card--wide"
-        id="project-form-section"
-        hidden
-        aria-labelledby="project-form-title"
-      >
-        <h1 class="admin-title" id="project-form-title">Añadir proyecto</h1>
+      <!-- Pantalla de la lista: aparece justo después de entrar con la frase
+           de paso. js/admin/projectList.js la rellena con los proyectos
+           importando js/data/projects.js como módulo. -->
+      <section class="admin-screen" id="project-list-section" hidden aria-labelledby="project-list-title">
+        <header class="admin-screen__header">
+          <h1 class="admin-title" id="project-list-title">Gestor de proyectos</h1>
+          <a class="btn btn--ghost" href="index.html">Volver a la web</a>
+        </header>
+
+        <table class="project-table" id="project-table">
+          <caption class="visually-hidden">Proyectos del portafolio</caption>
+          <tbody id="project-table-body">
+            <tr class="project-table__add-row">
+              <td colspan="2">
+                <button class="btn btn--primary btn--block" type="button" id="add-project-button">
+                  <svg class="btn__icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+                    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"></path>
+                  </svg>
+                  Añadir proyecto
+                </button>
+              </td>
+            </tr>
+            <!-- js/admin/projectList.js añade aquí una fila .project-table__row por proyecto -->
+          </tbody>
+        </table>
+
+        <p class="project-table-empty" id="project-table-empty" hidden>
+          Aún no hay proyectos.
+        </p>
+      </section>
+
+      <!-- Pantalla de añadir/editar: un único formulario para los dos modos.
+           Se guarda directamente en disco a través del servidor local
+           (scripts/admin-server.py), que exige el hash de la frase de paso
+           en cada petición de escritura. -->
+      <section class="admin-screen" id="project-form-section" hidden aria-labelledby="project-form-title">
+        <header class="admin-screen__header">
+          <h1 class="admin-title" id="project-form-title">Añadir proyecto</h1>
+          <a class="btn btn--ghost" href="#" id="cancel-form-link">Cancelar</a>
+        </header>
+
         <form class="admin-form" id="project-form" novalidate>
+          <input type="hidden" id="admin-editing-id" value="" />
+
           <div class="field">
             <label class="field__label" for="admin-title">Título</label>
             <input class="field__control" id="admin-title" required />
@@ -139,12 +172,19 @@
 
           <div class="field">
             <label class="field__label" for="admin-cover">Imagen de portada</label>
+            <div class="admin-current-image" id="admin-cover-current" hidden>
+              <img id="admin-cover-current-img" alt="Portada actual" />
+              <span class="admin-hint">Imagen actual. Sube una nueva para reemplazarla.</span>
+            </div>
             <input class="field__control" id="admin-cover" type="file" accept="image/*" />
             <p class="admin-hint">Máximo 1 MB. Se sube junto con el proyecto.</p>
           </div>
 
           <div class="field">
             <label class="field__label" for="admin-gallery">Más fotos (galería)</label>
+            <div class="admin-current-image" id="admin-gallery-current" hidden>
+              <span class="admin-hint">Fotos actuales. Sube nuevas para reemplazarlas todas.</span>
+            </div>
             <input class="field__control" id="admin-gallery" type="file" accept="image/*" multiple />
             <p class="admin-hint">Opcional, puedes elegir varias a la vez. Máximo 1 MB cada una.</p>
           </div>
@@ -181,6 +221,20 @@
         <div class="admin-log" id="admin-log" role="status" aria-live="polite"></div>
       </section>
     </main>
+
+    <!-- Diálogo de confirmación de borrado. js/admin/projectList.js lo
+         controla (mostrar/ocultar, foco, Escape, clic en el fondo). -->
+    <div class="confirm-dialog" id="confirm-dialog" aria-hidden="true">
+      <div class="confirm-dialog__backdrop" id="confirm-dialog-backdrop"></div>
+      <div class="confirm-dialog__card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
+        <h2 class="admin-title" id="confirm-dialog-title">Eliminar proyecto</h2>
+        <p id="confirm-dialog-message"></p>
+        <div class="confirm-dialog__actions">
+          <button class="btn btn--ghost" type="button" id="confirm-dialog-cancel">Cancelar</button>
+          <button class="btn btn--danger" type="button" id="confirm-dialog-confirm">Eliminar</button>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="js/admin/main-admin.js"></script>
   </body>
