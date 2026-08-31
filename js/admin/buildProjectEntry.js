@@ -303,3 +303,51 @@ export function removeProjectFromSource(sourceText, id) {
   const { start, end } = findProjectRange(sourceText, id);
   return sourceText.slice(0, start) + sourceText.slice(end);
 }
+
+/**
+ * Convierte un objeto Project (tal como sale de importar projects.js) en
+ * los valores de formulario que espera el panel — inverso de
+ * `buildProjectFromForm` para los campos de tipo lista.
+ * @param {object} project
+ * @returns {object}
+ */
+export function projectToFormValues(project) {
+  const links = project.links && typeof project.links === 'object' ? project.links : {};
+  return {
+    id: project.id || '',
+    title: project.title || '',
+    tagline: project.tagline || '',
+    description: project.description || '',
+    role: project.role || '',
+    year: project.year ? String(project.year) : '',
+    status: project.status || '',
+    featured: Boolean(project.featured),
+    tags: Array.isArray(project.tags) ? project.tags.join(', ') : '',
+    categories: Array.isArray(project.categories) ? project.categories.join(', ') : '',
+    highlights: Array.isArray(project.highlights) ? project.highlights.join('\n') : '',
+    links: {
+      demo: links.demo || '',
+      repo: links.repo || '',
+      caseStudy: links.caseStudy || '',
+    },
+  };
+}
+
+/**
+ * Construye el objeto Project actualizado para un proyecto que ya existía,
+ * conservando cualquier campo que el formulario no gestiona (por ejemplo
+ * `date`) y permitiendo borrar el año si se deja vacío en el formulario.
+ * @param {object} existingProject
+ * @param {object} values
+ * @param {string} coverPath
+ * @param {string[]} galleryPaths
+ * @returns {object}
+ */
+export function mergeEditedProject(existingProject, values, coverPath, galleryPaths) {
+  const built = buildProjectFromForm(values, coverPath, galleryPaths);
+  const merged = { ...existingProject, ...built };
+  if (!(values.year && String(values.year).trim())) {
+    delete merged.year;
+  }
+  return merged;
+}

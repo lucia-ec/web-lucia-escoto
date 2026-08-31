@@ -10,6 +10,8 @@ import {
   findProjectRange,
   replaceProjectInSource,
   removeProjectFromSource,
+  projectToFormValues,
+  mergeEditedProject,
 } from './buildProjectEntry.js';
 
 test('slugify converts a title into a clean kebab-case id', () => {
@@ -205,4 +207,63 @@ test('removeProjectFromSource mantiene indentación correcta al quitar el proyec
   assert.match(result, /^  \{[\s\S]*id: 'proyecto-tres'/m);
   // Verify no 4-space indentation from double whitespace
   assert.doesNotMatch(result, /^    \{[\s\S]*id: 'proyecto-tres'/m);
+});
+
+test('projectToFormValues convierte arrays en texto separado por comas', () => {
+  const project = {
+    id: 'demo',
+    title: 'Demo',
+    tags: ['Java', 'Kotlin'],
+    categories: ['movil'],
+    highlights: ['Uno', 'Dos'],
+    links: { demo: '', repo: 'https://github.com/x/y', caseStudy: '' },
+    year: 2026,
+    featured: true,
+  };
+  const values = projectToFormValues(project);
+  assert.equal(values.tags, 'Java, Kotlin');
+  assert.equal(values.categories, 'movil');
+  assert.equal(values.highlights, 'Uno\nDos');
+  assert.equal(values.links.repo, 'https://github.com/x/y');
+  assert.equal(values.year, '2026');
+  assert.equal(values.featured, true);
+});
+
+test('projectToFormValues es el inverso de buildProjectFromForm para los campos de tipo lista', () => {
+  const values = {
+    id: 'demo', title: 'Demo', tagline: '', description: '', role: '', year: '2026',
+    status: '', featured: false, tags: 'Java, Kotlin', categories: 'movil',
+    highlights: 'Uno\nDos', links: { demo: '', repo: '', caseStudy: '' },
+  };
+  const project = buildProjectFromForm(values, '', []);
+  const roundTrip = projectToFormValues(project);
+  assert.equal(roundTrip.tags, 'Java, Kotlin');
+  assert.equal(roundTrip.categories, 'movil');
+  assert.equal(roundTrip.highlights, 'Uno\nDos');
+});
+
+test('mergeEditedProject conserva campos que el formulario no gestiona, como date', () => {
+  const existing = {
+    id: 'demo', title: 'Demo', date: '2026-05-20', cover: 'assets/img/demo.png',
+    gallery: [], tags: [], categories: [], highlights: [], links: {},
+  };
+  const values = {
+    id: 'demo', title: 'Demo editado', tagline: '', description: '', role: '',
+    year: '2026', status: '', featured: false, tags: '', categories: '',
+    highlights: '', links: { demo: '', repo: '', caseStudy: '' },
+  };
+  const merged = mergeEditedProject(existing, values, 'assets/img/demo.png', []);
+  assert.equal(merged.date, '2026-05-20');
+  assert.equal(merged.title, 'Demo editado');
+});
+
+test('mergeEditedProject borra el año si se deja vacío en el formulario', () => {
+  const existing = { id: 'demo', title: 'Demo', year: 2026, tags: [], categories: [], highlights: [], links: {} };
+  const values = {
+    id: 'demo', title: 'Demo', tagline: '', description: '', role: '',
+    year: '', status: '', featured: false, tags: '', categories: '',
+    highlights: '', links: { demo: '', repo: '', caseStudy: '' },
+  };
+  const merged = mergeEditedProject(existing, values, '', []);
+  assert.equal('year' in merged, false);
 });
