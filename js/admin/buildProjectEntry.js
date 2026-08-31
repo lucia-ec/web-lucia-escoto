@@ -74,6 +74,10 @@ export function validateProjectForm(values, existingIds) {
     errors.year = 'Escribe un año de cuatro cifras, ej: 2026.';
   }
 
+  if (values.date && !/^\d{4}-\d{2}-\d{2}$/.test(String(values.date).trim())) {
+    errors.date = 'La fecha debe tener el formato AAAA-MM-DD.';
+  }
+
   if (values.status && !VALID_STATUSES.includes(values.status)) {
     errors.status = 'El estado debe ser finalizado, en curso o prototipo.';
   }
@@ -126,6 +130,9 @@ export function buildProjectFromForm(values, coverPath, galleryPaths) {
   };
   if (values.year && String(values.year).trim()) {
     project.year = Number(values.year);
+  }
+  if (values.date && String(values.date).trim()) {
+    project.date = String(values.date).trim();
   }
   return project;
 }
@@ -268,7 +275,7 @@ export function findProjectRange(sourceText, id) {
   }
 
   let start = range.start;
-  // Retract start to the beginning of the line (consume leading whitespace)
+  // Retrocede start hasta el inicio de la línea (consume los espacios en blanco iniciales)
   while (start > 0 && sourceText[start - 1] !== '\n') {
     start -= 1;
   }
@@ -320,6 +327,7 @@ export function projectToFormValues(project) {
     description: project.description || '',
     role: project.role || '',
     year: project.year ? String(project.year) : '',
+    date: project.date || '',
     status: project.status || '',
     featured: Boolean(project.featured),
     tags: Array.isArray(project.tags) ? project.tags.join(', ') : '',
@@ -348,6 +356,9 @@ export function mergeEditedProject(existingProject, values, coverPath, galleryPa
   const merged = { ...existingProject, ...built };
   if (!(values.year && String(values.year).trim())) {
     delete merged.year;
+  }
+  if (!(values.date && String(values.date).trim())) {
+    delete merged.date;
   }
   return merged;
 }

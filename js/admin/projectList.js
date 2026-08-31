@@ -180,7 +180,9 @@ export function renderProjectList({
  */
 export async function toggleFeatured(project, passphraseHash) {
   const { content: currentSource } = await fetchProjectsFile();
-  const updated = { ...project, featured: !project.featured };
+  const module = await import(`/js/data/projects.js?t=${Date.now()}`);
+  const fresh = module.projects.find((item) => item.id === project.id) || project;
+  const updated = { ...fresh, featured: !fresh.featured };
   const objectSource = formatProjectObjectSource(updated);
   const newSource = replaceProjectInSource(currentSource, project.id, objectSource);
   await saveProjectsFile(newSource, passphraseHash);

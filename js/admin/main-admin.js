@@ -103,6 +103,7 @@ function readFormValues() {
     description: $('#admin-description').value,
     role: $('#admin-role').value,
     year: $('#admin-year').value,
+    date: $('#admin-date').value,
     status: $('#admin-status').value,
     featured: $('#admin-featured').checked,
     tags: $('#admin-tags').value,
@@ -184,6 +185,7 @@ function resetFormToAddMode() {
   const galleryCurrent = $('#admin-gallery-current');
   galleryCurrent.querySelectorAll('img').forEach((img) => img.remove());
   galleryCurrent.hidden = true;
+  $('#admin-date').value = new Date().toISOString().slice(0, 10);
 }
 
 function openAddForm() {
@@ -208,6 +210,7 @@ function openEditForm(project) {
   $('#admin-description').value = values.description;
   $('#admin-role').value = values.role;
   $('#admin-year').value = values.year;
+  $('#admin-date').value = values.date || '';
   $('#admin-status').value = values.status;
   $('#admin-featured').checked = values.featured;
   $('#admin-tags').value = values.tags;
@@ -301,6 +304,14 @@ $('#project-form').addEventListener('submit', async (event) => {
   try {
     log('Leyendo proyectos existentes…');
     const { content: currentSource } = await fetchProjectsFile();
+
+    let freshEditingProject = editingProject;
+    if (editingProject) {
+      const projectsModule = await import(`/js/data/projects.js?t=${Date.now()}`);
+      freshEditingProject =
+        projectsModule.projects.find((item) => item.id === editingProject.id) || editingProject;
+    }
+
     const existingIds = extractExistingIds(currentSource);
     if (editingProject) existingIds.delete(editingProject.id);
 
@@ -319,14 +330,14 @@ $('#project-form').addEventListener('submit', async (event) => {
     );
 
     const id = values.id.trim();
-    let coverPath = editingProject ? editingProject.cover || '' : '';
+    let coverPath = freshEditingProject ? freshEditingProject.cover || '' : '';
     if (coverFile) {
       const filename = `${id}-cover.${fileExtension(coverFile)}`;
       log(`Guardando imagen de portada (assets/img/${filename})…`);
       coverPath = await uploadImageFile(filename, coverFile, passphraseHash);
     }
 
-    let galleryPaths = editingProject ? editingProject.gallery || [] : [];
+    let galleryPaths = freshEditingProject ? freshEditingProject.gallery || [] : [];
     if (galleryFiles.length > 0) {
       galleryPaths = [];
       for (let i = 0; i < galleryFiles.length; i += 1) {
@@ -339,7 +350,7 @@ $('#project-form').addEventListener('submit', async (event) => {
     }
 
     const project = editingProject
-      ? mergeEditedProject(editingProject, values, coverPath, galleryPaths)
+      ? mergeEditedProject(freshEditingProject, values, coverPath, galleryPaths)
       : buildProjectFromForm(values, coverPath, galleryPaths);
     const objectSource = formatProjectObjectSource(project);
 

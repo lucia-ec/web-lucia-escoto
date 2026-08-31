@@ -85,7 +85,7 @@
       <section class="admin-screen" id="project-form-section" hidden aria-labelledby="project-form-title">
         <header class="admin-screen__header">
           <h1 class="admin-title" id="project-form-title">Añadir proyecto</h1>
-          <a class="btn btn--ghost" href="#" id="cancel-form-link">Cancelar</a>
+          <button class="btn btn--ghost" type="button" id="cancel-form-link">Cancelar</button>
         </header>
 
         <form class="admin-form" id="project-form" novalidate>
@@ -138,6 +138,13 @@
               </select>
               <p class="field__error"></p>
             </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-date">Fecha de publicación</label>
+            <input class="field__control" id="admin-date" type="date" />
+            <p class="admin-hint">Se rellena con la fecha de hoy; puedes cambiarla si el proyecto es de antes.</p>
+            <p class="field__error"></p>
           </div>
 
           <label class="admin-checkbox">

@@ -5,8 +5,10 @@
    paso no aparece en este archivo ni en ningún otro del repositorio.
    QUÉ NO HACE: no es una protección criptográfica robusta por sí sola — no hay
    límite de intentos ni salado, porque no hay servidor que los haga cumplir.
-   La protección real es el token personal de GitHub (ver github.js): esta
-   frase de paso es solo un filtro contra la ojeada casual.
+   La protección real es que el servidor solo escucha en 127.0.0.1 y vuelve a
+   comprobar el hash de la frase de paso en cada escritura (ver
+   scripts/admin-server.py): esta frase de paso es solo un filtro contra la
+   ojeada casual.
    ============================================================================ */
 
 // Hash SHA-256 en hexadecimal de la frase de paso real. Se sustituye por el

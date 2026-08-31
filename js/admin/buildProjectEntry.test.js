@@ -243,19 +243,47 @@ test('projectToFormValues es el inverso de buildProjectFromForm para los campos 
   assert.equal(roundTrip.highlights, 'Uno\nDos');
 });
 
-test('mergeEditedProject conserva campos que el formulario no gestiona, como date', () => {
+test('mergeEditedProject conserva la fecha existente si el formulario la reenvía igual', () => {
   const existing = {
     id: 'demo', title: 'Demo', date: '2026-05-20', cover: 'assets/img/demo.png',
     gallery: [], tags: [], categories: [], highlights: [], links: {},
   };
   const values = {
     id: 'demo', title: 'Demo editado', tagline: '', description: '', role: '',
-    year: '2026', status: '', featured: false, tags: '', categories: '',
+    year: '2026', date: '2026-05-20', status: '', featured: false, tags: '', categories: '',
     highlights: '', links: { demo: '', repo: '', caseStudy: '' },
   };
   const merged = mergeEditedProject(existing, values, 'assets/img/demo.png', []);
   assert.equal(merged.date, '2026-05-20');
   assert.equal(merged.title, 'Demo editado');
+});
+
+test('mergeEditedProject borra date si se deja vacío en el formulario', () => {
+  const existing = {
+    id: 'demo', title: 'Demo', date: '2026-05-20', cover: '', gallery: [],
+    tags: [], categories: [], highlights: [], links: {},
+  };
+  const values = {
+    id: 'demo', title: 'Demo', tagline: '', description: '', role: '',
+    year: '', date: '', status: '', featured: false, tags: '', categories: '',
+    highlights: '', links: { demo: '', repo: '', caseStudy: '' },
+  };
+  const merged = mergeEditedProject(existing, values, '', []);
+  assert.equal('date' in merged, false);
+});
+
+test('buildProjectFromForm guarda la fecha de publicación cuando se rellena', () => {
+  const project = buildProjectFromForm(
+    { id: 'p', title: 'P', date: '2026-08-31' },
+    '',
+    []
+  );
+  assert.equal(project.date, '2026-08-31');
+});
+
+test('projectToFormValues expone la fecha de publicación', () => {
+  const values = projectToFormValues({ id: 'demo', title: 'Demo', date: '2026-08-31' });
+  assert.equal(values.date, '2026-08-31');
 });
 
 test('mergeEditedProject borra el año si se deja vacío en el formulario', () => {
