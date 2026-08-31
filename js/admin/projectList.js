@@ -158,7 +158,14 @@ export function renderProjectList({
     deleteButton.type = 'button';
     deleteButton.setAttribute('aria-label', `Eliminar "${project.title}"`);
     deleteButton.appendChild(iconSvg(DELETE_PATH));
-    deleteButton.addEventListener('click', () => onDelete(project));
+    deleteButton.addEventListener('click', async () => {
+      deleteButton.disabled = true;
+      try {
+        await onDelete(project);
+      } finally {
+        deleteButton.disabled = false;
+      }
+    });
     actionsCell.appendChild(deleteButton);
 
     row.appendChild(actionsCell);
