@@ -12,6 +12,7 @@ import {
   removeProjectFromSource,
   projectToFormValues,
   mergeEditedProject,
+  sortProjectsByDate,
 } from './buildProjectEntry.js';
 
 test('slugify converts a title into a clean kebab-case id', () => {
@@ -266,4 +267,31 @@ test('mergeEditedProject borra el año si se deja vacío en el formulario', () =
   };
   const merged = mergeEditedProject(existing, values, '', []);
   assert.equal('year' in merged, false);
+});
+
+test('sortProjectsByDate pone primero la fecha más reciente', () => {
+  const projects = [
+    { id: 'a', date: '2026-02-10' },
+    { id: 'b', date: '2026-07-01' },
+    { id: 'c', date: '2026-05-20' },
+  ];
+  const sorted = sortProjectsByDate(projects);
+  assert.deepEqual(sorted.map((p) => p.id), ['b', 'c', 'a']);
+});
+
+test('sortProjectsByDate manda al final, en su orden original, los proyectos sin date', () => {
+  const projects = [
+    { id: 'sin-fecha-1' },
+    { id: 'con-fecha', date: '2026-01-01' },
+    { id: 'sin-fecha-2' },
+  ];
+  const sorted = sortProjectsByDate(projects);
+  assert.deepEqual(sorted.map((p) => p.id), ['con-fecha', 'sin-fecha-1', 'sin-fecha-2']);
+});
+
+test('sortProjectsByDate no modifica el array original', () => {
+  const projects = [{ id: 'a', date: '2026-01-01' }, { id: 'b', date: '2026-02-01' }];
+  const copy = [...projects];
+  sortProjectsByDate(projects);
+  assert.deepEqual(projects, copy);
 });

@@ -351,3 +351,28 @@ export function mergeEditedProject(existingProject, values, coverPath, galleryPa
   }
   return merged;
 }
+
+/**
+ * Ordena una lista de proyectos por `date`, la más reciente primero. Los
+ * proyectos sin `date` van al final, conservando entre ellos el orden en
+ * que aparecían en el array original.
+ * @param {object[]} projects
+ * @returns {object[]} una copia nueva; no modifica el array recibido.
+ */
+export function sortProjectsByDate(projects) {
+  const withDate = [];
+  const withoutDate = [];
+  projects.forEach((project, index) => {
+    if (project.date) {
+      withDate.push({ project, index });
+    } else {
+      withoutDate.push({ project, index });
+    }
+  });
+  withDate.sort((a, b) => {
+    if (a.project.date === b.project.date) return a.index - b.index;
+    return a.project.date < b.project.date ? 1 : -1;
+  });
+  withoutDate.sort((a, b) => a.index - b.index);
+  return [...withDate, ...withoutDate].map((entry) => entry.project);
+}
