@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gestión de proyectos · Lucía Escoto Castro</title>
+    <meta name="robots" content="noindex, nofollow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:wght@400..700&display=swap"
+    />
+
+    <link rel="stylesheet" href="css/reset.css?v=64" />
+    <link rel="stylesheet" href="css/tokens.css?v=64" />
+    <link rel="stylesheet" href="css/base.css?v=64" />
+    <link rel="stylesheet" href="css/layout.css?v=64" />
+    <link rel="stylesheet" href="css/components.css?v=64" />
+    <link rel="stylesheet" href="css/admin.css?v=64" />
+  </head>
+
+  <body>
+    <main class="admin-page">
+      <!-- Paso 1: frase de paso. Filtro contra la ojeada casual, no una
+           protección criptográfica robusta: ver js/admin/auth.js. -->
+      <section class="admin-card" id="gate-passphrase" aria-labelledby="gate-passphrase-title">
+        <h1 class="admin-title" id="gate-passphrase-title">Gestión de proyectos</h1>
+        <p class="admin-hint">
+          Escribe la frase de paso para continuar. Si no la tienes, no es para ti.
+        </p>
+        <form class="admin-form" id="passphrase-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="passphrase-input">Frase de paso</label>
+            <input
+              class="field__control"
+              id="passphrase-input"
+              name="passphrase"
+              type="password"
+              autocomplete="off"
+              required
+            />
+            <p class="field__error" id="passphrase-error" aria-live="polite"></p>
+          </div>
+          <button class="btn btn--primary btn--block" type="submit">Entrar</button>
+        </form>
+      </section>
+
+      <!-- Paso 2: formulario del proyecto. Se guarda directamente en disco
+           a través del servidor local (scripts/admin-server.py), que exige
+           el hash de la frase de paso en cada petición de escritura. -->
+      <section
+        class="admin-card admin-card--wide"
+        id="project-form-section"
+        hidden
+        aria-labelledby="project-form-title"
+      >
+        <h1 class="admin-title" id="project-form-title">Añadir proyecto</h1>
+        <form class="admin-form" id="project-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="admin-title">Título</label>
+            <input class="field__control" id="admin-title" required />
+            <p class="field__error"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-id">Identificador (id)</label>
+            <input class="field__control" id="admin-id" required />
+            <p class="admin-hint">Se rellena solo a partir del título; puedes editarlo.</p>
+            <p class="field__error"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-tagline">Tagline</label>
+            <input class="field__control" id="admin-tagline" />
+            <p class="field__error"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-description">Descripción larga</label>
+            <textarea class="field__control" id="admin-description" rows="5"></textarea>
+            <p class="field__error"></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-role">Tu papel en el proyecto</label>
+            <input class="field__control" id="admin-role" />
+            <p class="field__error"></p>
+          </div>
+
+          <div class="admin-form-row">
+            <div class="field">
+              <label class="field__label" for="admin-year">Año</label>
+              <input class="field__control" id="admin-year" inputmode="numeric" placeholder="2026" />
+              <p class="field__error"></p>
+            </div>
+            <div class="field">
+              <label class="field__label" for="admin-status">Estado</label>
+              <select class="field__control" id="admin-status">
+                <option value="">Sin especificar</option>
+                <option value="finalizado">Finalizado</option>
+                <option value="en curso">En curso</option>
+                <option value="prototipo">Prototipo</option>
+              </select>
+              <p class="field__error"></p>
+            </div>
+          </div>
+
+          <label class="admin-checkbox">
+            <input type="checkbox" id="admin-featured" />
+            Destacar (tarjeta a doble ancho en escritorio)
+          </label>
+
+          <div class="field">
+            <label class="field__label" for="admin-tags">Tecnologías</label>
+            <input class="field__control" id="admin-tags" placeholder="Java, Kotlin, SQL" />
+            <p class="admin-hint">Separadas por comas.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-categories">Categorías</label>
+            <input class="field__control" id="admin-categories" placeholder="web, api" />
+            <p class="admin-hint">Separadas por comas (web, movil, api, escritorio, u otra nueva).</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-highlights">Puntos destacados</label>
+            <textarea
+              class="field__control"
+              id="admin-highlights"
+              rows="4"
+              placeholder="Un logro por línea"
+            ></textarea>
+            <p class="admin-hint">Uno por línea.</p>
+          </div>
+
+          <h2 class="modal__section-title">Fotos del proyecto</h2>
+
+          <div class="field">
+            <label class="field__label" for="admin-cover">Imagen de portada</label>
+            <input class="field__control" id="admin-cover" type="file" accept="image/*" />
+            <p class="admin-hint">Máximo 1 MB. Se sube junto con el proyecto.</p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-gallery">Más fotos (galería)</label>
+            <input class="field__control" id="admin-gallery" type="file" accept="image/*" multiple />
+            <p class="admin-hint">Opcional, puedes elegir varias a la vez. Máximo 1 MB cada una.</p>
+          </div>
+
+          <h2 class="modal__section-title">Enlaces</h2>
+
+          <div class="admin-form-row">
+            <div class="field">
+              <label class="field__label" for="admin-repo">Enlace a GitHub</label>
+              <input class="field__control" id="admin-repo" type="url" placeholder="https://github.com/…" />
+              <p class="admin-hint">El repositorio con el código del proyecto.</p>
+              <p class="field__error"></p>
+            </div>
+            <div class="field">
+              <label class="field__label" for="admin-demo">Enlace a demo</label>
+              <input class="field__control" id="admin-demo" type="url" placeholder="https://…" />
+              <p class="admin-hint">Opcional, si el proyecto tiene una versión en vivo.</p>
+              <p class="field__error"></p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="admin-case-study">Enlace al caso de estudio</label>
+            <input class="field__control" id="admin-case-study" type="url" placeholder="https://…" />
+            <p class="admin-hint">Opcional.</p>
+            <p class="field__error"></p>
+          </div>
+
+          <button class="btn btn--primary btn--block" type="submit" id="project-submit">
+            Publicar proyecto
+          </button>
+        </form>
+
+        <div class="admin-log" id="admin-log" role="status" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script type="module" src="js/admin/main-admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,116 @@
+/* ============================================================================
+   reset.css — Normalización moderna del navegador.
+   QUÉ HACE: neutraliza estilos por defecto inconsistentes (márgenes, box-sizing,
+   comportamiento de media, formularios) y fija comportamientos base seguros.
+   QUÉ NO HACE: no define colores, tipografías, espaciado ni componentes.
+   Esos valores viven en tokens.css / base.css. Aquí no hay ni un solo color.
+   ============================================================================ */
+
+/* Modelo de caja predecible en todo el documento */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Se eliminan los márgenes por defecto: el espaciado se decide en base.css */
+* {
+  margin: 0;
+}
+
+html {
+  /* Evita el salto horizontal cuando aparece/desaparece la barra de scroll
+     (por ejemplo al abrir el modal, que bloquea el scroll del body) */
+  scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100svh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Media a nivel de bloque y nunca desbordando su contenedor */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Ojo: NO se declara aquí `svg { fill: currentColor }`. Una regla CSS gana a
+   los atributos de presentación del SVG, así que rellenaría de color los
+   iconos dibujados a trazo (fill="none" stroke="currentColor") y los
+   convertiría en manchas. Cada icono declara su propio fill en el marcado. */
+
+/* Los formularios no heredan la tipografía por defecto: se fuerza */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Evita palabras que rompen el layout en pantallas estrechas */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+figcaption {
+  overflow-wrap: break-word;
+}
+
+/* Equilibrio de línea en titulares (mejora la lectura de textos cortos) */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* El foco por defecto se sustituye por :focus-visible en base.css */
+:focus {
+  outline: none;
+}
+
+/* Tablas y campos coherentes */
+table {
+  border-collapse: collapse;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Oculta contenido a la vista pero lo mantiene para lectores de pantalla */
+[hidden] {
+  display: none;
+}

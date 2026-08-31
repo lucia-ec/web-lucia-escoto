@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Imagen para redes sociales pendiente de reemplazar">
+  
+  <defs>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.8" fill="#2557e8" fill-opacity="0.16"></circle>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#f7f9fc"></rect>
+  <rect width="1200" height="630" fill="url(#dots)"></rect>
+  <rect x="0" y="0" width="1200" height="8" fill="#2557e8"></rect>
+  <g font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#0d1524">
+    <text x="88" y="250" font-size="82" font-weight="700" letter-spacing="-3">Lucía Escoto Castro</text>
+    <text x="88" y="330" font-size="40" font-weight="400" fill="#46536b">Desarrolladora de Aplicaciones</text>
+    <text x="88" y="382" font-size="40" font-weight="400" fill="#46536b">Multiplataforma</text>
+  </g>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#6c7a94">
+    <text x="88" y="500" font-size="24" letter-spacing="4">PORTAFOLIO · DAM</text>
+  </g>
+  <g transform="translate(1000 315)">
+    <rect x="-70" y="-70" width="140" height="140" rx="34" fill="#0d1524"></rect>
+    <text x="0" y="18" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="56" font-weight="700" fill="#f7f9fc">LE</text>
+  </g>
+</svg>

@@ -1,0 +1,499 @@
+/* ============================================================================
+   layout.css — Esqueleto de la página.
+   QUÉ HACE: contenedores, rejillas genéricas, header fijo (con barra de
+   progreso y menú móvil), estructura de <main>, cabeceras de sección y footer.
+   QUÉ NO HACE: no estiliza componentes internos (tarjetas, chips, modal) ni
+   el contenido concreto de cada sección.
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   Contenedores
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+/* --------------------------------------------------------------------------
+   Header fijo
+   -------------------------------------------------------------------------- */
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background-color: color-mix(in srgb, var(--color-paper) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid transparent;
+  transition: height var(--dur-3) var(--ease-out),
+    border-color var(--dur-3) var(--ease-out),
+    box-shadow var(--dur-3) var(--ease-out),
+    background-color var(--dur-3) var(--ease-out);
+}
+
+/* Estado comprimido: se activa desde navigation.js al bajar */
+.header.is-compact {
+  height: var(--header-h-compact);
+  border-bottom-color: var(--color-line);
+  box-shadow: var(--shadow-1);
+  background-color: color-mix(in srgb, var(--color-paper) 92%, transparent);
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+/* Logotipo: monograma con las iniciales */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--step-0);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+  padding: var(--space-3xs);
+  border-radius: var(--radius-sm);
+}
+
+.logo__mark {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-line);
+  object-fit: cover;
+  transition: border-color var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-spring);
+}
+
+.logo:hover .logo__mark {
+  border-color: var(--color-accent);
+  transform: rotate(-6deg);
+}
+
+.logo__text {
+  display: none;
+  font-size: var(--step-1);
+}
+
+/* Barra de progreso de lectura, anclada al borde inferior del header */
+.progress {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.progress__bar {
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent) 0%,
+    color-mix(in srgb, var(--color-accent) 55%, var(--color-ink)) 100%
+  );
+  will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+   Navegación
+   -------------------------------------------------------------------------- */
+.nav {
+  display: flex;
+  align-items: center;
+}
+
+.nav__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding-inline: var(--space-sm);
+  font-size: var(--step--1);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink-2);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: color var(--dur-1) var(--ease-out);
+}
+
+.nav__link:hover {
+  color: var(--color-ink);
+  font-weight: var(--weight-bold);
+}
+
+.nav__link:active {
+  transform: translateY(1px);
+}
+
+/* Enlace activo según la sección visible (lo marca navigation.js) */
+.nav__link.is-active {
+  color: var(--color-ink);
+  font-weight: var(--weight-bold);
+}
+
+.nav__link.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0.55rem;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-accent);
+  transform: translateX(-50%);
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+/* --------------------------------------------------------------------------
+   Menú móvil — panel deslizante
+   -------------------------------------------------------------------------- */
+.nav-toggle {
+  display: grid;
+  place-items: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: var(--radius-full);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-surface);
+  transition: background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out);
+}
+
+.nav-toggle:hover {
+  border-color: var(--color-line-strong);
+  background-color: var(--color-surface-2);
+}
+
+.nav-toggle__box {
+  display: block;
+  width: 18px;
+  height: 12px;
+  position: relative;
+}
+
+.nav-toggle__bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: var(--radius-full);
+  background-color: currentColor;
+  transition: transform var(--dur-2) var(--ease-out),
+    opacity var(--dur-1) var(--ease-out);
+}
+
+.nav-toggle__bar:nth-child(1) {
+  top: 0;
+}
+.nav-toggle__bar:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.nav-toggle__bar:nth-child(3) {
+  bottom: 0;
+}
+
+/* Estado abierto: hamburguesa → aspa */
+.nav-toggle[aria-expanded='true'] .nav-toggle__bar:nth-child(1) {
+  transform: translateY(5.25px) rotate(45deg);
+}
+.nav-toggle[aria-expanded='true'] .nav-toggle__bar:nth-child(2) {
+  opacity: 0;
+}
+.nav-toggle[aria-expanded='true'] .nav-toggle__bar:nth-child(3) {
+  transform: translateY(-5.25px) rotate(-45deg);
+}
+
+/* Velo oscuro tras el panel móvil */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background-color: rgb(8 13 23 / 0.45);
+  opacity: 0;
+  visibility: hidden;
+  /* visibility no se interpola: se retrasa hasta que termina el fundido al
+     cerrar, y salta al instante al abrir. Nunca se le pone una duración. */
+  transition: opacity var(--dur-2) var(--ease-out),
+    visibility 0s linear var(--dur-2);
+}
+
+.nav-overlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-2) var(--ease-out), visibility 0s;
+}
+
+/* --------------------------------------------------------------------------
+   Secciones
+   -------------------------------------------------------------------------- */
+.section {
+  /* Cada sección llena la pantalla: al saltar con el menú, toda la sección
+     queda visible de principio a fin dentro de la ventana (198px menos si
+     el contenido pide más altura). El desfase del header lo pone
+     scroll-padding-top en html, aquí no hace falta ningún margen. */
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-block: var(--space-section);
+}
+
+/* Sección con fondo alterno para marcar cambio de bloque */
+.section--tinted {
+  background-color: var(--color-surface);
+}
+
+.section__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+  max-width: 60ch;
+}
+
+.section__header:has(.section__title--single-line) {
+  max-width: none;
+}
+
+.section__title {
+  margin: 0;
+}
+
+/* Titular de una sola línea: se sale del ancho de lectura del encabezado y
+   se ajusta al ancho de la ventana para no partirse nunca. En móvil sí se
+   parte: en una línea quedaría ilegible. */
+@media (min-width: 48em) {
+  .section__title--single-line {
+    white-space: nowrap;
+    font-size: min(var(--step-4), 3.5vw);
+  }
+}
+
+/* Rejilla de dos columnas genérica (se colapsa en móvil) */
+.grid-split {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+.footer {
+  border-top: 1px solid var(--color-line);
+  padding-block: var(--space-xl);
+  background-color: var(--color-surface);
+}
+
+.footer__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.footer__meta {
+  font-size: var(--step--1);
+  color: var(--color-ink-3);
+  margin: 0;
+}
+
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-md);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer__link {
+  font-size: var(--step--1);
+  color: var(--color-ink-2);
+  padding-block: var(--space-3xs);
+  transition: color var(--dur-1) var(--ease-out);
+}
+
+.footer__link:hover {
+  color: var(--color-accent-ink);
+}
+
+.footer__link--icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer__link--icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* ==========================================================================
+   BREAKPOINTS — en em, mobile first
+   480px = 30em · 768px = 48em · 1024px = 64em · 1280px = 80em
+   ========================================================================== */
+
+@media (min-width: 30em) {
+  .logo__text {
+    display: inline;
+  }
+}
+
+/* A partir de tablet la navegación deja de ser un panel */
+@media (min-width: 48em) {
+  .grid-split {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .footer__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 64em) {
+  .nav-toggle {
+    display: none;
+  }
+
+  /* Rejilla de 3 columnas: así el nav queda en el centro real de la
+     cabecera, sin importar cuánto ocupen el logo o los iconos a cada lado
+     (con flex + space-between quedaba centrado solo si esos dos pesaban
+     lo mismo, cosa que no pasa). */
+  .header__inner {
+    display: grid;
+    /* minmax(0, 1fr), no 1fr a secas: si no, el navegador reparte el
+       espacio según el contenido de cada lado (el logo con texto pesa más
+       que el botón del tema) y el nav queda descentrado hacia un lado. */
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .logo {
+    justify-self: start;
+  }
+
+  .nav {
+    justify-self: center;
+  }
+
+  .header__actions {
+    justify-self: end;
+  }
+
+  /* Píldora flotante de cristal, estilo Apple: degradado translúcido de
+     arriba a abajo (más claro arriba, como luz atrapada en el borde
+     superior del cristal), desenfoque marcado, borde casi blanco y una
+     sombra de elevación real — visible siempre, no solo al pasar el ratón. */
+  .nav__list {
+    background-image: linear-gradient(
+      180deg,
+      var(--glass-bg-top),
+      var(--glass-bg-bottom)
+    );
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    padding: var(--space-3xs);
+    box-shadow: inset 0 1px 0 var(--glass-inset-highlight), var(--glass-shadow);
+  }
+
+  /* El enlace activo se distingue solo por el peso de la letra (ver la
+     regla base .nav__link.is-active): dentro de la píldora de cristal, un
+     fondo o sombra propios se veían como un borde encima del cristal. */
+  .nav__link.is-active::after {
+    content: none;
+  }
+}
+
+/* Panel móvil: solo por debajo de 64em. La navegación se convierte en una
+   hoja lateral con posición fija. Por encima, es una barra horizontal. */
+@media (max-width: 63.999em) {
+  .nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 95;
+    width: min(20rem, 82vw);
+    height: 100svh;
+    padding: calc(var(--header-h) + var(--space-lg)) var(--space-lg)
+      var(--space-lg);
+    background-color: var(--color-surface);
+    border-left: 1px solid var(--color-line);
+    box-shadow: var(--shadow-3);
+    transform: translateX(100%);
+    visibility: hidden;
+    /* Al abrir, visibility pasa a visible en el fotograma 0 (transición de
+       0 s): si se le diera duración, el navegador la mantendría en hidden
+       media transición y el primer enlace no podría recibir el foco.
+       Al cerrar, se retrasa hasta que el panel ha terminado de salir. */
+    transition: transform var(--dur-3) var(--ease-out),
+      visibility 0s linear var(--dur-3);
+    align-items: stretch;
+    overflow-y: auto;
+  }
+
+  .nav.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform var(--dur-3) var(--ease-out), visibility 0s;
+  }
+
+  .nav__list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3xs);
+    width: 100%;
+  }
+
+  .nav__link {
+    justify-content: flex-start;
+    padding-inline: var(--space-sm);
+    font-size: var(--step-1);
+    font-family: var(--font-display);
+    border-radius: var(--radius-md);
+  }
+
+  .nav__link.is-active::after {
+    left: auto;
+    right: var(--space-sm);
+    bottom: 50%;
+    transform: translateY(50%);
+  }
+}

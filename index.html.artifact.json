@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "web-lucia-escoto/index.html",
+  "entry": "web-lucia-escoto/index.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-08-21T21:16:48.468Z",
+  "updatedAt": "2026-08-21T22:24:01.797Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

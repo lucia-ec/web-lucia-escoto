@@ -1,0 +1,855 @@
+/* ============================================================================
+   sections.css — Estilos propios de cada sección de la página.
+   QUÉ HACE: hero (indicador de scroll), sobre mí, rejilla del portafolio,
+   contadores, habilidades y contacto.
+   QUÉ NO HACE: no redefine componentes reutilizables (viven en components.css)
+   ni contenedores/header/footer (layout.css).
+   ============================================================================ */
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero {
+  position: relative;
+  /* Pantalla completa en todos los tamaños: el hero llena la ventana y
+     centra su contenido. svh evita el salto de la barra del navegador. */
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding-top: calc(var(--header-h) + var(--space-sm));
+  padding-bottom: var(--space-lg);
+  overflow: hidden;
+  background-color: var(--color-paper);
+}
+
+/* ==========================================================================
+   Vídeo de fondo
+   Puro adorno (aria-hidden en el HTML). Ocupa todo el hero, por debajo del
+   contenido. El velo (.hero__video-overlay) usa el mismo tono de fondo de
+   la página (--color-paper, claro u oscuro según el tema) para atenuar el
+   vídeo sin taparlo del todo y que el texto se lea encima.
+   ========================================================================== */
+.hero__video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Ondas del hero, dibujadas en SVG: cinco láminas superpuestas, cada una
+   con su degradado propio y su sombra por encima (la que proyecta sobre la
+   lámina de detrás). Anclado abajo y a sangre por los lados. */
+.hero__waves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero__wave {
+  transition: filter 380ms var(--ease-out);
+  filter: drop-shadow(0 -4px 7px rgb(13 21 36 / 0.30))
+    drop-shadow(0 -16px 34px rgb(13 21 36 / 0.18));
+}
+
+/* Al pasar el cursor por una lámina, esa misma sombra se vuelve luz ámbar:
+   la lámina parece llevar una tira LED escondida por detrás. */
+.hero__wave:hover {
+  filter: drop-shadow(0 -4px 8px rgb(255 176 44 / 0.9))
+    drop-shadow(0 -10px 26px rgb(255 152 20 / 0.55))
+    drop-shadow(0 -18px 60px rgb(255 140 10 / 0.35));
+}
+
+/* Luz ambiente: un foco suave arriba a la derecha que levanta el conjunto. */
+.hero__ambient {
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+}
+
+/* Grano finísimo: quita el plano digital y da textura de impresión. */
+.hero__grain {
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.05;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__wave {
+    transition: none;
+  }
+}
+
+.hero__video-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-paper);
+  /* Velo ligero: la imagen tiene que verse, no quedar tapada. */
+  opacity: 0.06;
+  /* Sin esto, este velo (y el fundido de abajo) tapan el ratón y las ondas
+     nunca detectan el :hover que enciende su luz. */
+  pointer-events: none;
+}
+
+/* Capa de legibilidad del lado del texto: el velo se va retirando hacia la
+   derecha para que el vídeo se vea de verdad en el lado derecho, donde no
+   hay contenido. */
+.hero__video-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-paper) 0%,
+    color-mix(in srgb, var(--color-paper) 82%, transparent) 32%,
+    transparent 72%
+  );
+}
+
+/* Funde el borde inferior de la imagen con la sección siguiente (Sobre mí,
+   blanca), para que no se note el corte ni la costura de color. */
+.hero__fade-bottom {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 14vh;
+  background: linear-gradient(to bottom, transparent, var(--color-surface));
+  pointer-events: none;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: var(--space-2xl);
+  align-items: center;
+  /* .hero__content ocupa toda la celda de la rejilla aunque su texto (a la
+     izquierda) sea más estrecho: sin esto, esa zona "vacía" de la derecha
+     tapaba el ratón y las ondas de debajo nunca recibían el :hover. */
+  pointer-events: none;
+}
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+/* El bloque de texto sube dentro del hero: el título arranca justo debajo
+   del header y deja el resto de la pantalla para las olas. */
+@media (min-width: 56em) {
+  .hero__content {
+    margin-top: -260px;
+  }
+}
+
+.hero__title {
+  margin: 0;
+}
+
+/* Segunda línea del nombre en peso ligero: contraste dentro del mismo h1 */
+.hero__title-line {
+  display: block;
+}
+
+.hero__title-line--light {
+  font-weight: var(--weight-light);
+  color: var(--color-ink-2);
+}
+
+.hero__role {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-snug);
+  color: var(--color-ink);
+  margin: 0;
+  /* Ancho pensado para que rompa en dos líneas y "Multiplataforma" —la
+     palabra con el subrayado de acento— caiga sola en la segunda. */
+  max-width: 32ch;
+}
+
+/* Subrayado de acento bajo la palabra clave del titular */
+.hero__role em {
+  font-style: normal;
+  position: relative;
+  color: var(--color-accent-ink);
+}
+
+.hero__role em::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.08em;
+  height: 0.09em;
+  border-radius: var(--radius-full);
+  background-color: var(--color-accent);
+  opacity: 0.35;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-top: var(--space-2xs);
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   SOBRE MÍ
+   Pantalla partida en dos: quién es (tarjetas + datos) a la izquierda, con
+   qué trabaja (habilidades) a la derecha. Apilado en una columna hasta 56em;
+   a partir de ahí, dos mitades separadas por una línea vertical.
+   ========================================================================== */
+
+/* "Sobre mí" ajustado a la pantalla: menos padding superior y márgenes
+   internos para que el bloque de la izquierda (titular + tarjeta de perfil)
+   entre entero en el viewport, sin asomarse por debajo del borde. */
+#sobre-mi {
+  padding-top: calc(var(--header-h) + var(--space-sm));
+  padding-bottom: var(--space-xl);
+}
+
+#sobre-mi .section__header {
+  margin-bottom: var(--space-md);
+}
+
+#sobre-mi .profile-card {
+  padding: var(--space-lg);
+}
+
+.about-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2xl);
+  margin-top: var(--space-lg);
+}
+
+.about-split__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 56em) {
+  .about-split {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3xl);
+  }
+
+  /* Sin la antigua sangría de 104px: el rotador se centra dentro de su
+     columna y queda equilibrado con el hueco que deja el divisor. */
+  .about-split__col--skills {
+    padding-left: 0;
+  }
+}
+
+/* Tarjeta de perfil: foto + condición de estudiante + datos clave, todo en
+   un único bloque. El blob orgánico de fondo (--radius-organic, ya definido
+   en tokens.css pero sin usar hasta ahora) rompe la monotonía sin añadir
+   ningún dato nuevo: es puro adorno, por eso lleva aria-hidden. */
+.profile-card {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-xl);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-2);
+}
+
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: -4rem;
+  right: -4rem;
+  width: 14rem;
+  height: 14rem;
+  border-radius: var(--radius-organic);
+  background-image: linear-gradient(
+    135deg,
+    var(--color-accent-soft),
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+.profile-card__header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.profile-card__avatar {
+  display: block;
+  width: 4rem;
+  height: 4rem;
+  flex: none;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-line);
+  object-fit: cover;
+}
+
+.profile-card__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+/* Titular de "Sobre mí" ceñido a la mitad de la pantalla: el titular acaba
+   en el centro del viewport en vez de estirarse hasta el borde del
+   contenedor. text-wrap: balance reparte el texto en líneas equilibradas
+   para que no quede ninguna casi vacía. Solo a partir de tablet; en móvil
+   se mantiene a ancho completo. */
+@media (min-width: 48em) {
+  #about-title {
+    max-width: min(50vw, 100%);
+    text-wrap: balance;
+  }
+}
+
+.profile-card__label {
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  font-size: var(--step-1);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.profile-card__role {
+  font-size: var(--step--1);
+  color: var(--color-ink-2);
+  margin: 0;
+}
+
+.profile-card__divider {
+  position: relative;
+  height: 1px;
+  margin: var(--space-lg) 0;
+  background-color: var(--color-line);
+}
+
+.profile-facts {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-fact {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.profile-fact__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  border-radius: var(--radius-full);
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+}
+
+.profile-fact__icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.profile-fact__label {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+  white-space: nowrap;
+}
+
+.profile-fact__value {
+  font-size: var(--step--1);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink);
+  text-align: right;
+}
+
+/* ==========================================================================
+   PORTAFOLIO — la sección protagonista
+   ========================================================================== */
+.portfolio {
+  padding-top: calc(var(--space-section) * 0.6);
+  padding-bottom: calc(var(--space-section) * 1.15);
+}
+
+.portfolio__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
+}
+
+/* Contadores derivados de los datos: nunca cifras inventadas a mano */
+.counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-line);
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.counter__value {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter__label {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Panel de cifras: resumen + publicaciones por mes + dos anillos. Cuatro
+   tarjetas iguales que se acomodan solas según el ancho disponible.
+   -------------------------------------------------------------------------- */
+/* Apilado en móvil (resumen, mes, categorías, tecnologías, en ese orden).
+   A partir de 64em —mismo punto en el que aparece la barra lateral— pasa a
+   la rejilla que pidió: resumen y publicaciones por mes a la izquierda (uno
+   encima del otro), los dos anillos a la derecha (uno encima del otro). Cada
+   fila mide lo que pide su contenido más alto; las dos tarjetas de esa fila
+   se estiran para quedar a la misma altura (grid stretch, el valor por
+   defecto) en vez de quedar descuadradas entre sí. */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: none;
+  border-radius: var(--radius-lg);
+  /* Estilo "soft UI" hundido: mismo color que el fondo de la página (no
+     --color-surface, que se distingue de él) y sombra hacia dentro, para
+     que se lea como un hueco tallado en la superficie, no una tarjeta
+     flotando encima. */
+  background-color: var(--color-paper);
+  box-shadow: inset -10px -10px 10px rgb(255 255 255 / 0.7),
+    inset 10px 10px 10px rgb(174 174 192 / 0.2);
+}
+
+/* Solo la tarjeta de resumen lleva rótulo: sin él quedaba huérfana entre
+   los otros tres bloques, que sí se explican solos (mes, categorías,
+   tecnologías se leen en la propia gráfica). */
+.dashboard-card__title {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+  margin: 0;
+}
+
+@media (min-width: 64em) {
+  .dashboard {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: auto auto;
+    align-items: stretch;
+  }
+
+  .dashboard-card--summary {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .dashboard-card--monthly {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .dashboard-card--categories {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .dashboard-card--technologies {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+.dashboard-card .counters {
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xl);
+  margin-top: 0;
+  padding-top: var(--space-sm);
+  text-align: center;
+}
+
+.dashboard-card .counter {
+  align-items: center;
+}
+
+.dashboard-card .counter__value {
+  font-size: var(--step-2);
+}
+
+.dashboard-card .counter__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-line-chart {
+  width: 100%;
+  height: 9.5rem;
+  overflow: visible;
+}
+
+.dashboard-line-chart__gridline {
+  stroke: var(--color-line);
+  stroke-width: 0.25;
+}
+
+.dashboard-line-chart__gridlabel {
+  font-size: 3px;
+  font-family: var(--font-body);
+  fill: var(--color-ink-3);
+}
+
+.dashboard-line-chart__gradient-start {
+  stop-color: var(--chart-line);
+  stop-opacity: 0.45;
+}
+
+.dashboard-line-chart__gradient-end {
+  stop-color: var(--chart-line);
+  stop-opacity: 0;
+}
+
+.dashboard-line-chart__line {
+  stroke: var(--chart-line);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dashboard-line-chart__label {
+  font-size: 3.2px;
+  font-family: var(--font-body);
+  fill: var(--color-ink-3);
+}
+
+.dashboard-card--donut {
+  justify-content: center;
+}
+
+.dashboard-donut-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.dashboard-donut {
+  width: 5.5rem;
+  height: 5.5rem;
+  flex: none;
+}
+
+.dashboard-donut__track {
+  stroke: var(--color-line);
+}
+
+.dashboard-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-legend__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--step--1);
+  color: var(--color-ink-2);
+  min-width: 0;
+}
+
+.dashboard-legend__swatch {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: var(--radius-full);
+  flex: none;
+}
+
+.dashboard-legend__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-legend__percent {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  color: var(--color-ink-3);
+  flex: none;
+}
+
+/* --------------------------------------------------------------------------
+   Cuerpo del portafolio: filtros a la izquierda, panel de cifras a la
+   derecha, en la misma fila (a partir de 64em se estiran a la misma
+   altura). La rejilla de proyectos va debajo, ya fuera de esta fila, a todo
+   el ancho.
+   -------------------------------------------------------------------------- */
+.portfolio__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+/* Mismo aspecto que las tarjetas del panel de la derecha (tarjeta clara,
+   borde suave): variables locales para no repetir los tokens en cada regla
+   de .filter-item. */
+.portfolio__sidebar {
+  --sidebar-text: var(--color-ink-2);
+  --sidebar-text-strong: var(--color-ink);
+  --sidebar-text-muted: var(--color-ink-3);
+  --sidebar-accent: var(--color-accent);
+  --sidebar-hover-bg: var(--color-surface-2);
+  --sidebar-active-bg: var(--color-accent-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: none;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  /* "Soft UI" pero hacia fuera, al contrario que las tarjetas del panel:
+     aquí el filtro tiene que leerse como que flota sobre la página, no
+     como un hueco tallado en ella. */
+  box-shadow: -10px -10px 20px rgb(255 255 255 / 0.7),
+    10px 10px 20px rgb(174 174 192 / 0.35);
+}
+
+.portfolio__sidebar-title {
+  color: var(--sidebar-text-muted);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-line);
+}
+
+@media (min-width: 64em) {
+  .portfolio__body {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    align-items: start;
+    gap: var(--space-2xl);
+  }
+
+  /* Nunca más alto que el panel de cifras de al lado: el CSS grid por sí
+     solo no lo garantiza (un hijo con overflow no impide que su contenido
+     siga empujando la fila), así que js/main.js mide el panel de cifras y
+     fija esta altura máxima a mano; aquí solo se prepara el scroll. */
+  .portfolio__sidebar {
+    overflow-y: auto;
+  }
+}
+
+/* Rejilla responsive: auto-fit + minmax, sin media queries para las columnas */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(19rem, 100%), 1fr));
+  gap: var(--space-md);
+}
+
+/* Contenedor en transición durante el filtrado */
+.project-grid.is-filtering {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.project-grid {
+  transition: opacity var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
+}
+
+/* ==========================================================================
+   HABILIDADES — rotador de palabras clave
+   Cada apartado ("Con qué trabajo") resume sus palabras clave en una sola
+   transición: las palabras entran y salen una a una en bucle. Se sustituye
+   por completo el antiguo mapa conceptual: aquí solo tipografía, con aire.
+   ========================================================================== */
+.skills-rotator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.about-split__col--skills {
+  /* El rotador va arriba, al ras con la tarjeta de perfil de la izquierda,
+     y queda centrado horizontalmente en el hueco de su columna. */
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.word-cycle {
+  position: relative;
+  /* Altura fija para que el hueco no cambie al rotar la palabra; la mayor
+     (dos líneas para "Diseño responsive" o "Flexbox y Grid") marca el alto. */
+  min-height: clamp(10rem, 7rem + 8vw, 15rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.word-cycle__item {
+  /* Cada palabra ocupa todo el hueco reservado y se centra en él, tanto en
+     horizontal como en vertical; la animación solo pasea la opacidad y el
+     translateY, el centrado no se ve afectado. */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* La palabra es el elemento protagonista de la sección: grande y en negrita
+   para que domine la pantalla sobre el resto del contenido. */
+.word-cycle__word {
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 2.2rem + 5vw, 7rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-snug);
+  color: var(--color-ink);
+}
+
+/* ==========================================================================
+   CONTACTO
+   ========================================================================== */
+.contact__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.contact__form-title {
+  font-size: var(--step-1);
+  margin: 0;
+}
+
+.contact__note {
+  font-size: var(--step--2);
+  color: var(--color-ink-3);
+  margin: 0;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (min-width: 48em) {
+  .contact__form {
+    padding: var(--space-lg);
+  }
+}
+
+/* A partir de 64em las tarjetas destacadas ocupan doble ancho. */
+@media (min-width: 64em) {
+  .hero__inner {
+    width: 100%;
+  }
+
+  .hero__title {
+    font-size: clamp(3.9rem, 5.4vw + 1rem, 6.5rem);
+  }
+
+  .hero__role {
+    font-size: var(--step-3);
+  }
+
+  /* La tarjeta destacada ocupa dos columnas y coloca la imagen al lado */
+  .card--featured {
+    grid-column: span 2;
+    flex-direction: row;
+  }
+
+  .card--featured .card__media {
+    width: 52%;
+    aspect-ratio: auto;
+  }
+
+  .card--featured .card__body {
+    width: 48%;
+    justify-content: center;
+    padding: var(--space-xl);
+  }
+
+  /* En la tarjeta destacada el bloque va centrado como grupo: si el tagline
+     creciera, dejaría un hueco entre el texto y las tecnologías. */
+  .card--featured .card__tagline {
+    flex: 0 0 auto;
+  }
+
+  .card--featured .card__footer {
+    margin-top: var(--space-md);
+  }
+}
+
+@media (min-width: 80em) {
+  .project-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card--featured {
+    grid-column: span 2;
+  }
+}

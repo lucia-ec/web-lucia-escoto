@@ -1,0 +1,324 @@
+/* ============================================================================
+   animations.css — Movimiento del sitio.
+   QUÉ HACE: keyframes, estados de reveal al hacer scroll, escalonado (stagger)
+   por posición y el bloque obligatorio de prefers-reduced-motion.
+   QUÉ NO HACE: no define transiciones de hover/focus de los componentes (esas
+   viven junto a su componente, donde se entienden mejor).
+
+   REGLA: solo se animan `transform` y `opacity`. Nada que provoque layout.
+   El escalonado se hace con :nth-child en CSS, no con estilos en línea desde
+   JavaScript: así el HTML servido queda limpio y no hay estilos inyectados.
+   ============================================================================ */
+
+/* ==========================================================================
+   Keyframes
+   ========================================================================== */
+
+/* Entrada del hero al cargar la página */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   Secuencia de carga del hero
+   El retardo se escalona con nth-child sobre los hijos de .hero__content.
+   ========================================================================== */
+.hero__content > * {
+  animation: rise-in var(--dur-4) var(--ease-out) both;
+}
+
+.hero__content > *:nth-child(1) {
+  animation-delay: 60ms;
+}
+.hero__content > *:nth-child(2) {
+  animation-delay: 140ms;
+}
+.hero__content > *:nth-child(3) {
+  animation-delay: 220ms;
+}
+.hero__content > *:nth-child(4) {
+  animation-delay: 300ms;
+}
+.hero__content > *:nth-child(5) {
+  animation-delay: 380ms;
+}
+
+.hero__visual {
+  animation: rise-in var(--dur-4) var(--ease-out) 200ms both;
+}
+
+/* ==========================================================================
+   Reveal al entrar en viewport
+   scrollReveal.js solo añade/quita la clase .is-revealed. El estado inicial
+   lo pone el atributo data-reveal, que JS marca como activo añadiendo
+   .reveal-enabled al <html> — así, si JS no carga, todo se ve igual de bien.
+   ========================================================================== */
+.reveal-enabled [data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity var(--dur-4) var(--ease-out),
+    transform var(--dur-4) var(--ease-out);
+}
+
+.reveal-enabled [data-reveal='left'] {
+  transform: translateX(-22px);
+}
+
+.reveal-enabled [data-reveal='right'] {
+  transform: translateX(22px);
+}
+
+.reveal-enabled [data-reveal='scale'] {
+  transform: scale(0.96);
+}
+
+.reveal-enabled [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   Escalonado por posición dentro de su contenedor.
+   Se aplica a los hijos directos de las rejillas y listas que se revelan
+   en bloque. 10 pasos son suficientes; a partir de ahí se reutiliza el último.
+   -------------------------------------------------------------------------- */
+.reveal-enabled .project-grid > [data-reveal],
+.reveal-enabled .counters > [data-reveal],
+.reveal-enabled .dashboard > [data-reveal],
+.reveal-enabled .contact__links > [data-reveal] {
+  transition-delay: calc(var(--stagger) * 0);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(2),
+.reveal-enabled .counters > [data-reveal]:nth-child(2),
+.reveal-enabled .dashboard > [data-reveal]:nth-child(2),
+.reveal-enabled .contact__links > [data-reveal]:nth-child(2) {
+  transition-delay: calc(var(--stagger) * 1);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(3),
+.reveal-enabled .counters > [data-reveal]:nth-child(3),
+.reveal-enabled .dashboard > [data-reveal]:nth-child(3),
+.reveal-enabled .contact__links > [data-reveal]:nth-child(3) {
+  transition-delay: calc(var(--stagger) * 2);
+}
+
+.reveal-enabled .dashboard > [data-reveal]:nth-child(4) {
+  transition-delay: calc(var(--stagger) * 3);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(4) {
+  transition-delay: calc(var(--stagger) * 3);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(5) {
+  transition-delay: calc(var(--stagger) * 4);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(6) {
+  transition-delay: calc(var(--stagger) * 5);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(7) {
+  transition-delay: calc(var(--stagger) * 6);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(8) {
+  transition-delay: calc(var(--stagger) * 7);
+}
+
+.reveal-enabled .project-grid > [data-reveal]:nth-child(n + 9) {
+  transition-delay: calc(var(--stagger) * 8);
+}
+
+/* ==========================================================================
+   Reveal cíclico: entra Y sale con el scroll (a diferencia de [data-reveal],
+   que se revela una sola vez). scrollReveal.js alterna .is-revealed según el
+   elemento esté o no en el viewport, sin dejar de observarlo nunca. Se usa en
+   "Sobre mí" para que las tarjetas se sientan vivas al recorrer la página.
+   ========================================================================== */
+.reveal-enabled [data-reveal-cycle] {
+  opacity: 0;
+  transform: translateY(26px) scale(0.94);
+  transition: opacity var(--dur-4) var(--ease-out),
+    transform var(--dur-4) var(--ease-out);
+}
+
+.reveal-enabled [data-reveal-cycle].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ==========================================================================
+   Rotador de palabras clave ("Con qué trabajo")
+   La fila completa se desliza de derecha a izquierda a velocidad constante.
+   Al llegar a la mitad (donde empieza la copia duplicada de la lista) vuelve
+   al principio, y el salto no se ve.
+   ========================================================================== */
+@keyframes word-cycle {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.word-cycle {
+  animation: word-cycle 32s linear infinite;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   OBLIGATORIO: respeto por prefers-reduced-motion.
+   Todo el contenido queda visible y en su sitio; solo desaparece el movimiento.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    animation-delay: 0s;
+    transition-duration: 0.01ms;
+    /* Sin esto, el escalonado seguiría retrasando los cambios de estado
+       aunque la transición ya no dure nada */
+    transition-delay: 0s;
+    scroll-behavior: auto;
+  }
+
+  /* El reveal se anula por completo: nada aparece ni se desplaza */
+  .reveal-enabled [data-reveal],
+  .reveal-enabled [data-reveal='left'],
+  .reveal-enabled [data-reveal='right'],
+  .reveal-enabled [data-reveal='scale'],
+  .reveal-enabled [data-reveal-cycle] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero__content > *,
+  .hero__visual {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Sin parallax: JS también lo comprueba, esto es la segunda barrera */
+  .hero__visual {
+    transform: none;
+  }
+
+  /* El rotador de palabras deja de rotar: todas se ven quietas en lista */
+  .word-cycle {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .card:hover,
+  .card:hover .card__img,
+  .btn:hover,
+  .contact-link:hover {
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   Dibujo de contacto
+   La notificación entra de golpe y se queda un rato; las ondas del aviso
+   salen del móvil una tras otra, en bucle.
+   ========================================================================== */
+@keyframes notice-in {
+  0%,
+  6% {
+    opacity: 0;
+    transform: translate(10px, 8px) scale(0.9);
+  }
+  14%,
+  86% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  96%,
+  100% {
+    opacity: 0;
+    transform: translate(10px, 8px) scale(0.9);
+  }
+}
+
+@keyframes ping-out {
+  0%,
+  8% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  40%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.contact-doodle__notice {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: notice-in 6s var(--ease-out) infinite both;
+}
+
+.contact-doodle__ping-arc {
+  animation: ping-out 6s var(--ease-out) infinite both;
+}
+
+.contact-doodle__ping-arc:nth-child(2) {
+  animation-delay: 0.35s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-doodle__notice,
+  .contact-doodle__ping-arc {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Ola de letras ("Hablemos...")
+   Cada letra arranca un poco después que la anterior, así que el bache
+   recorre la palabra de izquierda a derecha y vuelve a empezar.
+   ========================================================================== */
+@keyframes wave-char {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0);
+  }
+  22% {
+    transform: translateY(-0.18em);
+  }
+}
+
+.wave-text__char {
+  animation: wave-char 1.9s var(--ease-in-out) infinite both;
+  animation-delay: calc(var(--i) * 0.075s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-text__char {
+    animation: none;
+  }
+}
