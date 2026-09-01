@@ -2,3 +2,5 @@
 .DS_Store
 .worktrees/
 docs/superpowers/
+.claude/
+CLAUDE.md
