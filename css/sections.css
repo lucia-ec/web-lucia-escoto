@@ -90,13 +90,6 @@
   opacity: 0.5;
 }
 
-/* Grano finísimo: quita el plano digital y da textura de impresión. */
-.hero__grain {
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  opacity: 0.05;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .hero__wave-halo--led {
     transition: none;
