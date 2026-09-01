@@ -10,6 +10,50 @@
 
 .admin-page {
   min-height: 100svh;
+  display: grid;
+  place-items: center;
+}
+
+/* Las pantallas a pantalla completa (lista, formulario) no deben centrarse
+   verticalmente como la tarjeta de login — se quedan arriba y a lo ancho,
+   para que el contenido largo haga scroll con normalidad. */
+.admin-screen {
+  align-self: start;
+  justify-self: stretch;
+}
+
+/* .field fija su propio display: flex (components.css), lo que por cascada
+   normal ganaría al display: none del atributo [hidden]. Esta regla, del
+   mismo peso pero declarada después, evita que el campo del identificador
+   (oculto por defecto, se rellena solo) se vea igualmente. */
+.field[hidden] {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Fondo ambiental y panel de cristal — solo al editar un proyecto existente.
+   Al añadir uno nuevo la pantalla se queda como siempre (sin fondo ni caja).
+   -------------------------------------------------------------------------- */
+body.is-editing-project {
+  background-color: var(--color-surface);
+}
+
+.glass-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+body.is-editing-project .glass-panel {
+  padding: var(--space-xl);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-xl);
+  /* Sombra hacia dentro (no hacia fuera): como el fondo es del mismo color
+     que el contenedor, la profundidad la da un hundimiento, no un flotado. */
+  box-shadow:
+    inset 0 2px 6px rgb(13 21 36 / 0.08),
+    inset 0 10px 24px rgb(13 21 36 / 0.06);
 }
 
 /* --------------------------------------------------------------------------
@@ -18,7 +62,7 @@
 .admin-card {
   width: 100%;
   max-width: 34rem;
-  margin: var(--space-2xl) auto;
+  margin: var(--space-md) auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
@@ -26,7 +70,11 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-2);
+  /* Sombra a dos capas con un toque de color, para que la tarjeta parezca
+     flotar sobre el fondo en vez de quedarse pegada a él. */
+  box-shadow:
+    0 30px 60px -20px rgb(96 130 175 / 0.35),
+    0 12px 24px rgb(13 21 36 / 0.10);
 }
 
 /* .admin-card fija su propio display: flex, lo que por cascada normal
@@ -63,8 +111,10 @@
 }
 
 .admin-title {
-  font-size: var(--step-2);
+  font-size: var(--step-3);
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-snug);
 }
 
 .admin-hint {
@@ -79,10 +129,178 @@
   gap: var(--space-sm);
 }
 
+/* Campos del panel (login, añadir/editar): bordes más redondeados y gris
+   claro en reposo, estilo "campo de sistema" de Apple — blanco al enfocar. */
+.admin-form .field__control {
+  border-radius: var(--radius-full);
+  border-color: var(--color-line-strong);
+  background-color: #f6f8fb;
+  /* Misma sensación de hundido que el contenedor grande: sombra hacia
+     dentro, no hacia fuera. */
+  box-shadow:
+    inset 0 1px 3px rgb(13 21 36 / 0.08),
+    inset 0 2px 8px rgb(13 21 36 / 0.05);
+}
+
+.admin-form .field__control:hover {
+  border-color: var(--color-line-strong);
+  background-color: #f6f8fb;
+}
+
+.admin-form .field__control:focus-visible {
+  background-color: var(--color-surface);
+  border-color: transparent;
+  outline: none;
+  /* Se combina el hundido de siempre (hacia dentro) con un resplandor de
+     luz azul que se apaga hacia fuera, no un aro de borde plano. */
+  box-shadow:
+    inset 0 1px 3px rgb(13 21 36 / 0.08),
+    inset 0 2px 8px rgb(13 21 36 / 0.05),
+    0 0 10px 2px rgb(3 105 161 / 0.14),
+    0 0 22px 8px rgb(3 105 161 / 0.08),
+    0 0 36px 14px rgb(3 105 161 / 0.04);
+}
+
+/* La píldora (radio total) no funciona en una caja alta: las esquinas se
+   comen el texto. La textarea se queda con un radio normal, en px. */
+.admin-form textarea.field__control {
+  border-radius: 18px;
+}
+
+/* Safari conserva el aspecto nativo de <select> (incluidas sus esquinas)
+   aunque se le ponga border-radius, a menos que se le quite la apariencia
+   nativa del todo. Se sustituye la flechita nativa por una propia en SVG. */
+.admin-form select.field__control {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2346536b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+  background-size: 1.1em;
+  padding-right: var(--space-2xl);
+}
+
+/* .admin-form estira sus hijos a lo ancho por defecto (flex column); este
+   botón debe quedarse a la izquierda, del tamaño de su propio contenido. */
+#project-submit {
+  align-self: flex-start;
+}
+
 .admin-form-row {
   display: grid;
   gap: var(--space-sm);
   grid-template-columns: 1fr;
+}
+
+/* --------------------------------------------------------------------------
+   Pestañas del formulario: índice a la izquierda, contenido a la derecha.
+   -------------------------------------------------------------------------- */
+.form-layout {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: var(--space-lg);
+  align-items: start;
+}
+
+.form-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.form-tabs__item {
+  text-align: left;
+  padding: var(--space-2xs) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-ink-2);
+  font-size: var(--step--1);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+
+.form-tabs__item:hover {
+  background-color: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.form-tabs__item.is-active {
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+}
+
+.form-tabs__panels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.form-tabs__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.form-tabs__panel[hidden] {
+  display: none;
+}
+
+@media (max-width: 40em) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Zona de arrastrar y soltar imágenes.
+   -------------------------------------------------------------------------- */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  min-height: 8rem;
+  padding: var(--space-lg);
+  border: 2px dashed var(--color-line-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-2);
+  color: var(--color-ink-2);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--dur-1) var(--ease-out),
+    background-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+
+.dropzone:hover {
+  border-color: var(--color-accent);
+}
+
+.dropzone.is-dragover {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+}
+
+.dropzone__icon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.dropzone__text {
+  font-size: var(--step--1);
+  font-weight: var(--weight-medium);
 }
 
 .admin-checkbox {
@@ -115,6 +333,73 @@
   object-fit: cover;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-line);
+}
+
+.admin-current-image__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3xs);
+}
+
+.btn--danger-text {
+  padding-inline: 0;
+  color: var(--color-danger);
+  border-color: transparent;
+  background: transparent;
+  min-height: auto;
+}
+
+.btn--danger-text:hover {
+  border-color: transparent;
+  background: transparent;
+  text-decoration: underline;
+}
+
+.admin-current-image--gallery {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.admin-gallery-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.admin-gallery-thumb {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
+}
+
+.admin-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line);
+}
+
+.admin-gallery-thumb__remove {
+  position: absolute;
+  top: -0.4rem;
+  right: -0.4rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-surface);
+  color: var(--color-danger);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.admin-gallery-thumb__remove svg {
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 .admin-actions {
@@ -168,9 +453,7 @@
 }
 
 .project-table__title-cell {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
+  font-size: var(--step--1);
   font-weight: var(--weight-medium);
   color: var(--color-ink);
 }
@@ -180,8 +463,11 @@
   white-space: nowrap;
 }
 
-.project-table__actions-cell .icon-btn {
-  margin-inline-start: var(--space-2xs);
+.project-table__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
 }
 
 .icon-btn--star {
@@ -263,12 +549,73 @@
 
 .confirm-dialog__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: var(--space-2xs);
+}
+
+.confirm-dialog__title {
+  text-transform: none;
+  text-align: center;
 }
 
 @media (min-width: 30em) {
   .admin-form-row {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Calendario de Flatpickr (selector de "Fecha de publicación"): mismo
+   lenguaje visual que el resto del panel — bordes redondeados, algo más
+   grande y más separado del campo. La librería trae su propio CSS con
+   selectores muy específicos; se usa !important solo aquí, para ganarle
+   a ese CSS ajeno sin tocar su archivo.
+   -------------------------------------------------------------------------- */
+.flatpickr-calendar {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-3) !important;
+  border: 1px solid var(--color-line) !important;
+  font-family: inherit !important;
+  padding: var(--space-sm) !important;
+}
+
+.flatpickr-calendar.arrowBottom::before,
+.flatpickr-calendar.arrowBottom::after {
+  display: none !important;
+}
+
+/* margin no mueve un elemento position:absolute posicionado con "top"; el
+   hueco de separación con el campo se consigue con un transform, que no
+   afecta al cálculo de posición que hace Flatpickr por su cuenta. */
+.flatpickr-calendar.arrowBottom {
+  transform: translateY(-40px) !important;
+}
+
+.flatpickr-day {
+  border-radius: var(--radius-full) !important;
+}
+
+/* El año se queda invisible si su hueco se estrecha demasiado (pasa en
+   ventanas o pantallas estrechas) — le damos un ancho mínimo garantizado. */
+.flatpickr-current-month .numInputWrapper {
+  min-width: 4.2em !important;
+}
+
+.flatpickr-current-month input.cur-year {
+  min-width: 3.6em !important;
+  text-align: left !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.flatpickr-day.today {
+  border-color: var(--color-accent) !important;
+}
+
+.flatpickr-day.today:hover {
+  background: var(--color-accent-soft) !important;
 }

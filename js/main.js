@@ -15,6 +15,7 @@ import { renderProjects, cleanList } from './modules/renderProjects.js?v=64';
 import { initFilters } from './modules/filters.js?v=64';
 import { initDashboard } from './modules/dashboard.js?v=64';
 import { initModal } from './modules/modal.js?v=64';
+import { initLightbox } from './modules/lightbox.js?v=64';
 import { initScrollReveal, revealWithin } from './modules/scrollReveal.js?v=64';
 import { initNavigation } from './modules/navigation.js?v=64';
 
@@ -41,6 +42,16 @@ initNavigation({
 /* ==========================================================================
    2. Modal de proyecto
    ========================================================================== */
+const lightbox = initLightbox({
+  root: $('#image-lightbox'),
+  image: $('#lightbox-image'),
+  backdrop: $('#lightbox-backdrop'),
+  closeButton: $('#lightbox-close'),
+  prevButton: $('#lightbox-prev'),
+  nextButton: $('#lightbox-next'),
+  counter: $('#lightbox-counter'),
+});
+
 const modal = initModal({
   root: $('#project-modal'),
   content: $('#modal-content'),
@@ -48,6 +59,7 @@ const modal = initModal({
   backdrop: $('#modal-backdrop'),
   closeButton: $('#modal-close'),
   titleId: 'modal-title',
+  onImageClick: lightbox.open,
 });
 
 /* ==========================================================================

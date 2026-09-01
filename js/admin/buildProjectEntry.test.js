@@ -59,19 +59,13 @@ test('validateProjectForm rejects a link that is not http(s)', () => {
   assert.match(errors['links.repo'], /http/);
 });
 
-test('validateProjectForm rejects a non-numeric year', () => {
-  const errors = validateProjectForm({ id: 'x', title: 'X', year: 'pronto' }, new Set());
-  assert.match(errors.year, /año/);
-});
-
 test('buildProjectFromForm splits comma and newline separated lists', () => {
   const project = buildProjectFromForm(
-    { id: 'p', title: 'P', tags: 'Java, Kotlin\nSQL', highlights: 'Uno\nDos' },
+    { id: 'p', title: 'P', tags: 'Java, Kotlin\nSQL' },
     'assets/img/p-cover.webp',
     []
   );
   assert.deepEqual(project.tags, ['Java', 'Kotlin', 'SQL']);
-  assert.deepEqual(project.highlights, ['Uno', 'Dos']);
   assert.equal(project.cover, 'assets/img/p-cover.webp');
 });
 
@@ -216,31 +210,26 @@ test('projectToFormValues convierte arrays en texto separado por comas', () => {
     title: 'Demo',
     tags: ['Java', 'Kotlin'],
     categories: ['movil'],
-    highlights: ['Uno', 'Dos'],
     links: { demo: '', repo: 'https://github.com/x/y', caseStudy: '' },
-    year: 2026,
     featured: true,
   };
   const values = projectToFormValues(project);
   assert.equal(values.tags, 'Java, Kotlin');
   assert.equal(values.categories, 'movil');
-  assert.equal(values.highlights, 'Uno\nDos');
   assert.equal(values.links.repo, 'https://github.com/x/y');
-  assert.equal(values.year, '2026');
   assert.equal(values.featured, true);
 });
 
 test('projectToFormValues es el inverso de buildProjectFromForm para los campos de tipo lista', () => {
   const values = {
-    id: 'demo', title: 'Demo', tagline: '', description: '', role: '', year: '2026',
+    id: 'demo', title: 'Demo', tagline: '', description: '',
     status: '', featured: false, tags: 'Java, Kotlin', categories: 'movil',
-    highlights: 'Uno\nDos', links: { demo: '', repo: '', caseStudy: '' },
+    links: { demo: '', repo: '' },
   };
   const project = buildProjectFromForm(values, '', []);
   const roundTrip = projectToFormValues(project);
   assert.equal(roundTrip.tags, 'Java, Kotlin');
   assert.equal(roundTrip.categories, 'movil');
-  assert.equal(roundTrip.highlights, 'Uno\nDos');
 });
 
 test('mergeEditedProject conserva la fecha existente si el formulario la reenvía igual', () => {
@@ -286,15 +275,36 @@ test('projectToFormValues expone la fecha de publicación', () => {
   assert.equal(values.date, '2026-08-31');
 });
 
-test('mergeEditedProject borra el año si se deja vacío en el formulario', () => {
-  const existing = { id: 'demo', title: 'Demo', year: 2026, tags: [], categories: [], highlights: [], links: {} };
+test('mergeEditedProject conserva year, role y highlights, que el formulario ya no gestiona', () => {
+  const existing = {
+    id: 'demo', title: 'Demo', year: 2026, role: 'Desarrollo completo',
+    highlights: ['Uno', 'Dos'], tags: [], categories: [], links: {},
+  };
   const values = {
-    id: 'demo', title: 'Demo', tagline: '', description: '', role: '',
-    year: '', status: '', featured: false, tags: '', categories: '',
-    highlights: '', links: { demo: '', repo: '', caseStudy: '' },
+    id: 'demo', title: 'Demo editado', tagline: '', description: '',
+    status: '', featured: false, tags: '', categories: '',
+    links: { demo: '', repo: '' },
   };
   const merged = mergeEditedProject(existing, values, '', []);
-  assert.equal('year' in merged, false);
+  assert.equal(merged.year, 2026);
+  assert.equal(merged.role, 'Desarrollo completo');
+  assert.deepEqual(merged.highlights, ['Uno', 'Dos']);
+  assert.equal(merged.title, 'Demo editado');
+});
+
+test('mergeEditedProject conserva el enlace de caso de estudio, que el formulario no gestiona', () => {
+  const existing = {
+    id: 'demo', title: 'Demo', tags: [], categories: [],
+    links: { demo: 'https://old-demo.com', repo: '', caseStudy: 'https://caso.com' },
+  };
+  const values = {
+    id: 'demo', title: 'Demo', tagline: '', description: '',
+    status: '', featured: false, tags: '', categories: '',
+    links: { demo: 'https://new-demo.com', repo: '' },
+  };
+  const merged = mergeEditedProject(existing, values, '', []);
+  assert.equal(merged.links.caseStudy, 'https://caso.com');
+  assert.equal(merged.links.demo, 'https://new-demo.com');
 });
 
 test('sortProjectsByDate pone primero la fecha más reciente', () => {

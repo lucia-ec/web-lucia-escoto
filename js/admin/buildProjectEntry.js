@@ -70,10 +70,6 @@ export function validateProjectForm(values, existingIds) {
     errors.title = 'El título es obligatorio.';
   }
 
-  if (values.year && !/^\d{4}$/.test(String(values.year).trim())) {
-    errors.year = 'Escribe un año de cuatro cifras, ej: 2026.';
-  }
-
   if (values.date && !/^\d{4}-\d{2}-\d{2}$/.test(String(values.date).trim())) {
     errors.date = 'La fecha debe tener el formato AAAA-MM-DD.';
   }
@@ -82,7 +78,7 @@ export function validateProjectForm(values, existingIds) {
     errors.status = 'El estado debe ser finalizado, en curso o prototipo.';
   }
 
-  const linkLabels = { demo: 'demo', repo: 'repositorio', caseStudy: 'caso de estudio' };
+  const linkLabels = { demo: 'demo', repo: 'repositorio' };
   for (const [field, label] of Object.entries(linkLabels)) {
     const url = values.links && values.links[field];
     if (url && url.trim() && !/^https?:\/\//.test(url.trim())) {
@@ -114,23 +110,17 @@ export function buildProjectFromForm(values, coverPath, galleryPaths) {
     title: values.title.trim(),
     tagline: (values.tagline || '').trim(),
     description: (values.description || '').trim(),
-    role: (values.role || '').trim(),
     status: values.status || '',
     featured: Boolean(values.featured),
     tags: splitList(values.tags),
     categories: splitList(values.categories),
     cover: coverPath || '',
     gallery: galleryPaths || [],
-    highlights: splitList(values.highlights),
     links: {
       demo: ((values.links && values.links.demo) || '').trim(),
       repo: ((values.links && values.links.repo) || '').trim(),
-      caseStudy: ((values.links && values.links.caseStudy) || '').trim(),
     },
   };
-  if (values.year && String(values.year).trim()) {
-    project.year = Number(values.year);
-  }
   if (values.date && String(values.date).trim()) {
     project.date = String(values.date).trim();
   }
@@ -325,26 +315,24 @@ export function projectToFormValues(project) {
     title: project.title || '',
     tagline: project.tagline || '',
     description: project.description || '',
-    role: project.role || '',
-    year: project.year ? String(project.year) : '',
     date: project.date || '',
     status: project.status || '',
     featured: Boolean(project.featured),
     tags: Array.isArray(project.tags) ? project.tags.join(', ') : '',
     categories: Array.isArray(project.categories) ? project.categories.join(', ') : '',
-    highlights: Array.isArray(project.highlights) ? project.highlights.join('\n') : '',
     links: {
       demo: links.demo || '',
       repo: links.repo || '',
-      caseStudy: links.caseStudy || '',
     },
   };
 }
 
 /**
  * Construye el objeto Project actualizado para un proyecto que ya existía,
- * conservando cualquier campo que el formulario no gestiona (por ejemplo
- * `date`) y permitiendo borrar el año si se deja vacío en el formulario.
+ * conservando cualquier campo que el formulario no gestiona: `year`, `role`
+ * y `highlights` (quitados del formulario, se conservan tal cual estaban) y
+ * el enlace de caso de estudio dentro de `links` (el formulario solo
+ * gestiona demo y repo). Permite borrar la fecha si se deja vacía.
  * @param {object} existingProject
  * @param {object} values
  * @param {string} coverPath
@@ -354,9 +342,10 @@ export function projectToFormValues(project) {
 export function mergeEditedProject(existingProject, values, coverPath, galleryPaths) {
   const built = buildProjectFromForm(values, coverPath, galleryPaths);
   const merged = { ...existingProject, ...built };
-  if (!(values.year && String(values.year).trim())) {
-    delete merged.year;
-  }
+  merged.links = {
+    ...built.links,
+    caseStudy: (existingProject.links && existingProject.links.caseStudy) || '',
+  };
   if (!(values.date && String(values.date).trim())) {
     delete merged.date;
   }

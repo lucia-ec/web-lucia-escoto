@@ -891,44 +891,10 @@
 /* ==========================================================================
    CONTACTO
    ========================================================================== */
-/* Enlaces a la izquierda, dibujo a la derecha. */
 .contact__body {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-xl);
-  align-items: center;
-}
-
-@media (min-width: 56em) {
-  .contact__body {
-    grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
-    gap: var(--space-2xl);
-  }
-}
-
-.contact__figure {
   display: flex;
-  justify-content: center;
-}
-
-.contact-mascota {
-  width: 100%;
-  max-width: 34rem;
-  height: auto;
-  display: block;
-  /* Difuminado en los cuatro bordes para que no se vea el corte del vídeo. */
-  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 96%);
-  mask-image: radial-gradient(closest-side, #000 55%, transparent 96%);
-}
-
-/* Hueco reservado mientras no hay mascota: mismo espacio que ocupaba el vídeo. */
-.contact-mascota--placeholder {
-  aspect-ratio: 1 / 1;
-  height: auto;
-  border-radius: 1rem;
-  background: rgb(13 21 36 / 0.04);
-  -webkit-mask-image: none;
-  mask-image: none;
+  flex-direction: column;
+  gap: var(--space-xl);
 }
 
 .contact-doodle {

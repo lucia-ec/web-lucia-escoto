@@ -108,31 +108,35 @@ export const projects = [
     },
   },
   {
-    id: 'rutas-accesibles',
-    title: 'Ruta Abierta',
-    tagline:
-      'App móvil que marca qué tramos de una ciudad son accesibles en silla de ruedas.',
-    description:
-      'Prototipo funcional de una aplicación Android que permite a cualquier persona señalar barreras arquitectónicas —un bordillo sin rebaje, una obra, un ascensor averiado— y consultar las que otras personas han marcado antes. Los datos se guardan en local con Room para que la app siga siendo útil sin cobertura y se sincronizan cuando vuelve la conexión. Ahora mismo está en desarrollo: el registro de incidencias y el mapa funcionan, y el siguiente paso es la validación comunitaria de los avisos para que no se acumulen marcas obsoletas.',
-    role: 'Desarrollo Android y diseño de la interfaz',
-    year: 2026,
-    /* REEMPLAZAR con la fecha real de publicación */
-    date: '2026-07-01',
-    status: 'en curso',
-    featured: false,
-    tags: ['Kotlin', 'Android', 'Room', 'Retrofit'],
-    categories: ['movil'],
-    cover: 'assets/img/proyecto-3.png',
-    gallery: [],
-    highlights: [
-      'Funciona sin conexión: Room como fuente de verdad local y sincronización diferida.',
-      'Interfaz pensada desde la accesibilidad, con áreas táctiles grandes y contraste alto.',
+    "id": "rutas-accesibles",
+    "title": "Ruta Abierta",
+    "tagline": "App móvil que marca qué tramos de una ciudad son accesibles en silla de ruedas.",
+    "description": "Prototipo funcional de una aplicación Android que permite a cualquier persona señalar barreras arquitectónicas —un bordillo sin rebaje, una obra, un ascensor averiado— y consultar las que otras personas han marcado antes. Los datos se guardan en local con Room para que la app siga siendo útil sin cobertura y se sincronizan cuando vuelve la conexión. Ahora mismo está en desarrollo: el registro de incidencias y el mapa funcionan, y el siguiente paso es la validación comunitaria de los avisos para que no se acumulen marcas obsoletas.",
+    "role": "Desarrollo Android y diseño de la interfaz",
+    "year": 2026,
+    "date": "2026-07-01",
+    "status": "en curso",
+    "featured": false,
+    "tags": [
+      "Kotlin",
+      "Android",
+      "Room",
+      "Retrofit"
     ],
-    links: {
-      demo: '',
-      repo: 'https://github.com/USUARIO-GITHUB/ruta-abierta',
-      caseStudy: '',
-    },
+    "categories": [
+      "movil"
+    ],
+    "cover": "assets/img/proyecto-3.png",
+    "gallery": [],
+    "highlights": [
+      "Funciona sin conexión: Room como fuente de verdad local y sincronización diferida.",
+      "Interfaz pensada desde la accesibilidad, con áreas táctiles grandes y contraste alto."
+    ],
+    "links": {
+      "demo": "",
+      "repo": "https://github.com/USUARIO-GITHUB/ruta-abierta",
+      "caseStudy": ""
+    }
   },
 ];
 

@@ -686,11 +686,6 @@
                 </svg>
               </a>
             </div>
-
-            <!-- PLACEHOLDER MASCOTA: hueco reservado para la mascota definitiva. -->
-            <div class="contact__figure" data-placeholder="mascota" aria-hidden="true">
-              <div class="contact-mascota contact-mascota--placeholder"></div>
-            </div>
           </div>
         </div>
       </section>
@@ -742,6 +737,35 @@
         </button>
         <div class="modal__content" id="modal-content"></div>
       </div>
+    </div>
+
+    <!-- ====================================================================
+         VISOR DE IMAGEN AMPLIADA (lightbox)
+         Se abre al pulsar cualquier foto de la galería del modal de detalle.
+         Un clic sobre la imagen alterna el zoom. Si el proyecto tiene varias
+         fotos, las flechas (o las teclas ←/→) pasan de una a otra.
+         ==================================================================== -->
+    <div class="lightbox" id="image-lightbox" aria-hidden="true">
+      <div class="lightbox__backdrop" id="lightbox-backdrop"></div>
+      <button class="icon-btn lightbox__close" id="lightbox-close" type="button" aria-label="Cerrar imagen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+      <button class="icon-btn lightbox__nav lightbox__nav--prev" id="lightbox-prev" type="button" aria-label="Foto anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6"></path>
+        </svg>
+      </button>
+      <button class="icon-btn lightbox__nav lightbox__nav--next" id="lightbox-next" type="button" aria-label="Foto siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 6l6 6-6 6"></path>
+        </svg>
+      </button>
+      <div class="lightbox__viewport" id="lightbox-viewport">
+        <img class="lightbox__image" id="lightbox-image" src="" alt="" />
+      </div>
+      <p class="lightbox__counter" id="lightbox-counter"></p>
     </div>
 
     <!-- Los módulos ES se difieren por defecto: no hace falta el atributo defer -->

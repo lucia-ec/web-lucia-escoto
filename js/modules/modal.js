@@ -66,6 +66,12 @@ function statusModifier(status) {
  * @param {HTMLElement} options.backdrop  El fondo clicable
  * @param {HTMLElement} options.closeButton
  * @param {string} options.titleId        id del h2 que titula el diálogo
+ * @param {(images: {src: string, alt: string}[], index: number) => void} [options.onImageClick]
+ *        Se llama al pulsar una foto de la galería, con la lista completa de
+ *        fotos del proyecto y el índice de la que se pulsó — quien
+ *        inicializa el modal decide qué hacer (por ejemplo, abrir el visor
+ *        ampliado de js/modules/lightbox.js, que ya sabe pasar a la
+ *        anterior/siguiente con esa misma lista).
  * @returns {{ open: (project: object) => void, close: () => void }}
  */
 export function initModal({
@@ -75,6 +81,7 @@ export function initModal({
   backdrop,
   closeButton,
   titleId,
+  onImageClick,
 }) {
   if (!root || !content || !dialog) {
     return { open() {}, close() {} };
@@ -132,15 +139,22 @@ export function initModal({
     }
     if (images.length > 0) {
       const gallery = el('div', 'modal__gallery');
+      const galleryImages = images.map((src, index) => ({
+        src,
+        alt: `${project.title}: imagen ${index + 1} de ${images.length}`,
+      }));
       images.forEach((src, index) => {
         const figure = el('figure', 'modal__figure');
         const img = el('img');
         img.src = src;
-        img.alt = `${project.title}: imagen ${index + 1} de ${images.length}`;
+        img.alt = galleryImages[index].alt;
         img.loading = 'lazy';
         img.decoding = 'async';
         img.width = 1200;
         img.height = 750;
+        if (typeof onImageClick === 'function') {
+          img.addEventListener('click', () => onImageClick(galleryImages, index));
+        }
         figure.appendChild(img);
         gallery.appendChild(figure);
       });

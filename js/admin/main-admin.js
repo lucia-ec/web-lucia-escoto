@@ -29,11 +29,62 @@ import { renderProjectList, confirmDialog, toggleFeatured, deleteProject } from 
 const $ = (selector) => document.querySelector(selector);
 const MAX_IMAGE_BYTES = 1_000_000;
 
+/* Calendario de Flatpickr para "Fecha de publicación": abre hacia arriba,
+   con el aspecto de las tarjetas del panel (ver css/admin.css). Se guarda
+   la instancia porque cambiar el valor a mano (values.date = "...") no
+   avisa a Flatpickr — hay que usar su propio setDate(). */
+const dateInputPicker = window.flatpickr('#admin-date', {
+  dateFormat: 'Y-m-d',
+  position: 'above',
+  allowInput: true,
+  disableMobile: true,
+});
+
 /* Hash de la frase de paso ya verificada en esta sesión. Solo vive en esta
    variable de módulo (memoria de la pestaña) — nunca se guarda en disco ni
    en localStorage/sessionStorage. Se manda en cada petición al servidor
    local para que él también compruebe que quien escribe tiene permiso. */
 let passphraseHash = '';
+
+/* Estado de las imágenes del proyecto en edición: qué queda de la portada
+   y de la galería que ya había en disco, después de que la usuaria quite
+   alguna a mano (independiente de los archivos nuevos que elija subir). */
+let coverRemoved = false;
+let currentGalleryPaths = [];
+
+function renderGalleryGrid() {
+  const grid = $('#admin-gallery-grid');
+  grid.replaceChildren();
+  currentGalleryPaths.forEach((src, index) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'admin-gallery-thumb';
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    thumb.appendChild(img);
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'admin-gallery-thumb__remove';
+    removeButton.setAttribute('aria-label', `Quitar foto ${index + 1} de la galería`);
+    removeButton.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
+    removeButton.addEventListener('click', () => {
+      currentGalleryPaths.splice(index, 1);
+      renderGalleryGrid();
+    });
+    thumb.appendChild(removeButton);
+
+    grid.appendChild(thumb);
+  });
+  $('#admin-gallery-current').hidden = currentGalleryPaths.length === 0;
+}
+
+$('#admin-cover-remove').addEventListener('click', () => {
+  coverRemoved = true;
+  $('#admin-cover-current').hidden = true;
+});
 
 /* null = modo "añadir"; objeto Project = modo "editar" (guarda los datos
    originales, incluidas las rutas de portada/galería, para conservarlas si
@@ -55,6 +106,9 @@ function showScreen(name) {
   Object.entries(screens).forEach(([key, node]) => {
     node.hidden = key !== name;
   });
+  /* Fondo y panel de cristal especiales, solo mientras se edita un proyecto
+     ya existente (no al añadir uno nuevo). */
+  document.body.classList.toggle('is-editing-project', name === 'form' && Boolean(editingProject));
 }
 
 function log(message) {
@@ -81,7 +135,7 @@ function clearFieldErrors() {
 
 function showFieldErrors(errors) {
   clearFieldErrors();
-  const idMap = { demo: 'admin-demo', repo: 'admin-repo', caseStudy: 'admin-case-study' };
+  const idMap = { demo: 'admin-demo', repo: 'admin-repo' };
   for (const [key, message] of Object.entries(errors)) {
     const fieldName = key.startsWith('links.') ? key.split('.')[1] : key;
     const controlId = idMap[fieldName] || `admin-${fieldName}`;
@@ -101,18 +155,14 @@ function readFormValues() {
     title: $('#admin-title').value,
     tagline: $('#admin-tagline').value,
     description: $('#admin-description').value,
-    role: $('#admin-role').value,
-    year: $('#admin-year').value,
     date: $('#admin-date').value,
     status: $('#admin-status').value,
     featured: $('#admin-featured').checked,
     tags: $('#admin-tags').value,
     categories: $('#admin-categories').value,
-    highlights: $('#admin-highlights').value,
     links: {
       demo: $('#admin-demo').value,
       repo: $('#admin-repo').value,
-      caseStudy: $('#admin-case-study').value,
     },
   };
 }
@@ -169,6 +219,85 @@ async function handleToggleFeatured(project) {
 }
 
 /* ---------------------------------------------------------------------
+   Pestañas del formulario (General, Etiquetas, Imágenes, Enlaces)
+   --------------------------------------------------------------------- */
+const FORM_TABS = ['general', 'tags', 'images', 'links'];
+
+function showTab(name) {
+  FORM_TABS.forEach((tab) => {
+    const button = $(`#tab-btn-${tab}`);
+    const panel = $(`#tab-${tab}`);
+    const isActive = tab === name;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+    panel.hidden = !isActive;
+  });
+}
+
+FORM_TABS.forEach((tab) => {
+  $(`#tab-btn-${tab}`).addEventListener('click', () => showTab(tab));
+});
+
+/* ---------------------------------------------------------------------
+   Arrastrar y soltar imágenes sobre las cajas de "Imágenes"
+   --------------------------------------------------------------------- */
+function setupDropzone(dropzoneId, inputId, textId, defaultText) {
+  const dropzone = $(dropzoneId);
+  const input = $(inputId);
+  const textNode = $(textId);
+
+  function updateText() {
+    const files = input.files;
+    if (!files || files.length === 0) {
+      textNode.textContent = defaultText;
+    } else if (files.length === 1) {
+      textNode.textContent = files[0].name;
+    } else {
+      textNode.textContent = `${files.length} archivos seleccionados`;
+    }
+  }
+
+  input.addEventListener('change', updateText);
+
+  ['dragenter', 'dragover'].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.add('is-dragover');
+    });
+  });
+
+  ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
+    dropzone.addEventListener(eventName, () => {
+      dropzone.classList.remove('is-dragover');
+    });
+  });
+
+  dropzone.addEventListener('drop', (event) => {
+    event.preventDefault();
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      input.files = files;
+      updateText();
+    }
+  });
+
+  return { updateText };
+}
+
+const coverDropzone = setupDropzone(
+  '#admin-cover-dropzone',
+  '#admin-cover',
+  '#admin-cover-dropzone-text',
+  'Arrastra una imagen aquí, o haz clic para elegirla'
+);
+const galleryDropzone = setupDropzone(
+  '#admin-gallery-dropzone',
+  '#admin-gallery',
+  '#admin-gallery-dropzone-text',
+  'Arrastra varias fotos aquí, o haz clic para elegirlas'
+);
+
+/* ---------------------------------------------------------------------
    Formulario: modo añadir / modo editar
    --------------------------------------------------------------------- */
 function resetFormToAddMode() {
@@ -182,10 +311,13 @@ function resetFormToAddMode() {
   submitButton.classList.remove('btn--success');
   submitButton.classList.add('btn--primary');
   $('#admin-cover-current').hidden = true;
-  const galleryCurrent = $('#admin-gallery-current');
-  galleryCurrent.querySelectorAll('img').forEach((img) => img.remove());
-  galleryCurrent.hidden = true;
-  $('#admin-date').value = new Date().toISOString().slice(0, 10);
+  coverRemoved = false;
+  currentGalleryPaths = [];
+  renderGalleryGrid();
+  dateInputPicker.setDate(new Date(), false);
+  coverDropzone.updateText();
+  galleryDropzone.updateText();
+  showTab('general');
 }
 
 function openAddForm() {
@@ -208,18 +340,18 @@ function openEditForm(project) {
   $('#admin-id').value = values.id;
   $('#admin-tagline').value = values.tagline;
   $('#admin-description').value = values.description;
-  $('#admin-role').value = values.role;
-  $('#admin-year').value = values.year;
-  $('#admin-date').value = values.date || '';
+  dateInputPicker.setDate(values.date || '', false);
   $('#admin-status').value = values.status;
   $('#admin-featured').checked = values.featured;
   $('#admin-tags').value = values.tags;
   $('#admin-categories').value = values.categories;
-  $('#admin-highlights').value = values.highlights;
   $('#admin-demo').value = values.links.demo;
   $('#admin-repo').value = values.links.repo;
-  $('#admin-case-study').value = values.links.caseStudy;
+  coverDropzone.updateText();
+  galleryDropzone.updateText();
+  showTab('general');
 
+  coverRemoved = false;
   const coverCurrent = $('#admin-cover-current');
   if (project.cover) {
     $('#admin-cover-current-img').src = project.cover;
@@ -228,19 +360,8 @@ function openEditForm(project) {
     coverCurrent.hidden = true;
   }
 
-  const galleryCurrent = $('#admin-gallery-current');
-  galleryCurrent.querySelectorAll('img').forEach((img) => img.remove());
-  if (Array.isArray(project.gallery) && project.gallery.length > 0) {
-    project.gallery.forEach((src) => {
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = '';
-      galleryCurrent.insertBefore(img, galleryCurrent.firstChild);
-    });
-    galleryCurrent.hidden = false;
-  } else {
-    galleryCurrent.hidden = true;
-  }
+  currentGalleryPaths = Array.isArray(project.gallery) ? [...project.gallery] : [];
+  renderGalleryGrid();
 
   $('#project-form-title').textContent = 'Editar proyecto';
   const submitButton = $('#project-submit');
@@ -330,23 +451,22 @@ $('#project-form').addEventListener('submit', async (event) => {
     );
 
     const id = values.id.trim();
-    let coverPath = freshEditingProject ? freshEditingProject.cover || '' : '';
+    let coverPath = coverRemoved ? '' : (freshEditingProject ? freshEditingProject.cover || '' : '');
     if (coverFile) {
       const filename = `${id}-cover.${fileExtension(coverFile)}`;
       log(`Guardando imagen de portada (assets/img/${filename})…`);
       coverPath = await uploadImageFile(filename, coverFile, passphraseHash);
     }
 
-    let galleryPaths = freshEditingProject ? freshEditingProject.gallery || [] : [];
-    if (galleryFiles.length > 0) {
-      galleryPaths = [];
-      for (let i = 0; i < galleryFiles.length; i += 1) {
-        const file = galleryFiles[i];
-        const filename = `${id}-${i + 1}.${fileExtension(file)}`;
-        log(`Guardando imagen de galería ${i + 1} de ${galleryFiles.length}…`);
-        const path = await uploadImageFile(filename, file, passphraseHash);
-        galleryPaths.push(path);
-      }
+    /* La galería final es lo que quedó tras quitar fotos a mano, más las
+       que se suban ahora — no sustituye todo por lo nuevo. */
+    const galleryPaths = [...currentGalleryPaths];
+    for (let i = 0; i < galleryFiles.length; i += 1) {
+      const file = galleryFiles[i];
+      const filename = `${id}-${galleryPaths.length + 1}.${fileExtension(file)}`;
+      log(`Guardando imagen de galería ${i + 1} de ${galleryFiles.length}…`);
+      const path = await uploadImageFile(filename, file, passphraseHash);
+      galleryPaths.push(path);
     }
 
     const project = editingProject

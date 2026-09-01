@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/base.css?v=64" />
     <link rel="stylesheet" href="css/layout.css?v=64" />
     <link rel="stylesheet" href="css/components.css?v=64" />
+    <link rel="stylesheet" href="css/vendor/flatpickr.min.css" />
     <link rel="stylesheet" href="css/admin.css?v=64" />
   </head>
 
@@ -61,7 +62,7 @@
           <tbody id="project-table-body">
             <tr class="project-table__add-row">
               <td colspan="2">
-                <button class="btn btn--primary btn--block" type="button" id="add-project-button">
+                <button class="btn btn--primary" type="button" id="add-project-button">
                   <svg class="btn__icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
                     <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"></path>
                   </svg>
@@ -83,6 +84,7 @@
            (scripts/admin-server.py), que exige el hash de la frase de paso
            en cada petición de escritura. -->
       <section class="admin-screen" id="project-form-section" hidden aria-labelledby="project-form-title">
+        <div class="glass-panel" id="project-form-glass">
         <header class="admin-screen__header">
           <h1 class="admin-title" id="project-form-title">Añadir proyecto</h1>
           <button class="btn btn--ghost" type="button" id="cancel-form-link">Cancelar</button>
@@ -91,141 +93,141 @@
         <form class="admin-form" id="project-form" novalidate>
           <input type="hidden" id="admin-editing-id" value="" />
 
-          <div class="field">
-            <label class="field__label" for="admin-title">Título</label>
-            <input class="field__control" id="admin-title" required />
-            <p class="field__error"></p>
-          </div>
-
-          <div class="field">
+          <div class="field" hidden>
             <label class="field__label" for="admin-id">Identificador (id)</label>
             <input class="field__control" id="admin-id" required />
             <p class="admin-hint">Se rellena solo a partir del título; puedes editarlo.</p>
             <p class="field__error"></p>
           </div>
 
-          <div class="field">
-            <label class="field__label" for="admin-tagline">Tagline</label>
-            <input class="field__control" id="admin-tagline" />
-            <p class="field__error"></p>
-          </div>
+          <div class="form-layout">
+            <nav class="form-tabs" role="tablist" aria-label="Secciones del formulario">
+              <button class="form-tabs__item is-active" type="button" role="tab" aria-selected="true" aria-controls="tab-general" id="tab-btn-general">General</button>
+              <button class="form-tabs__item" type="button" role="tab" aria-selected="false" aria-controls="tab-tags" id="tab-btn-tags">Etiquetas</button>
+              <button class="form-tabs__item" type="button" role="tab" aria-selected="false" aria-controls="tab-images" id="tab-btn-images">Imágenes</button>
+              <button class="form-tabs__item" type="button" role="tab" aria-selected="false" aria-controls="tab-links" id="tab-btn-links">Enlaces</button>
+            </nav>
 
-          <div class="field">
-            <label class="field__label" for="admin-description">Descripción larga</label>
-            <textarea class="field__control" id="admin-description" rows="5"></textarea>
-            <p class="field__error"></p>
-          </div>
+            <div class="form-tabs__panels">
+              <div class="form-tabs__panel" id="tab-general" role="tabpanel" aria-labelledby="tab-btn-general">
+                <div class="field">
+                  <label class="field__label" for="admin-title">Título</label>
+                  <input class="field__control" id="admin-title" required />
+                  <p class="field__error"></p>
+                </div>
 
-          <div class="field">
-            <label class="field__label" for="admin-role">Tu papel en el proyecto</label>
-            <input class="field__control" id="admin-role" />
-            <p class="field__error"></p>
-          </div>
+                <div class="field">
+                  <label class="field__label" for="admin-tagline">Tagline</label>
+                  <input class="field__control" id="admin-tagline" />
+                  <p class="field__error"></p>
+                </div>
 
-          <div class="admin-form-row">
-            <div class="field">
-              <label class="field__label" for="admin-year">Año</label>
-              <input class="field__control" id="admin-year" inputmode="numeric" placeholder="2026" />
-              <p class="field__error"></p>
+                <div class="field">
+                  <label class="field__label" for="admin-description">Descripción larga</label>
+                  <textarea class="field__control" id="admin-description" rows="5"></textarea>
+                  <p class="field__error"></p>
+                </div>
+
+                <div class="admin-form-row">
+                  <div class="field">
+                    <label class="field__label" for="admin-date">Fecha de publicación</label>
+                    <input class="field__control" id="admin-date" type="text" autocomplete="off" placeholder="AAAA-MM-DD" />
+                    <p class="admin-hint">Se rellena con la fecha de hoy.</p>
+                    <p class="field__error"></p>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="admin-status">Estado</label>
+                    <select class="field__control" id="admin-status">
+                      <option value="">Sin especificar</option>
+                      <option value="finalizado">Finalizado</option>
+                      <option value="en curso">En curso</option>
+                      <option value="prototipo">Prototipo</option>
+                    </select>
+                    <p class="field__error"></p>
+                  </div>
+                </div>
+
+                <label class="admin-checkbox">
+                  <input type="checkbox" id="admin-featured" />
+                  Destacar (tarjeta a doble ancho en escritorio)
+                </label>
+              </div>
+
+              <div class="form-tabs__panel" id="tab-tags" role="tabpanel" aria-labelledby="tab-btn-tags" hidden>
+                <div class="field">
+                  <label class="field__label" for="admin-tags">Tecnologías</label>
+                  <input class="field__control" id="admin-tags" placeholder="Java, Kotlin, SQL" />
+                  <p class="admin-hint">Separadas por comas.</p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="admin-categories">Categorías</label>
+                  <input class="field__control" id="admin-categories" placeholder="web, api" />
+                  <p class="admin-hint">Separadas por comas (web, movil, api, escritorio, u otra nueva).</p>
+                </div>
+              </div>
+
+              <div class="form-tabs__panel" id="tab-images" role="tabpanel" aria-labelledby="tab-btn-images" hidden>
+                <div class="field">
+                  <label class="field__label" for="admin-cover">Imagen de portada</label>
+                  <div class="admin-current-image" id="admin-cover-current" hidden>
+                    <img id="admin-cover-current-img" alt="Portada actual" />
+                    <div class="admin-current-image__info">
+                      <span class="admin-hint">Imagen actual. Sube una nueva para reemplazarla.</span>
+                      <button class="btn btn--ghost btn--danger-text" type="button" id="admin-cover-remove">Quitar portada</button>
+                    </div>
+                  </div>
+                  <label class="dropzone" for="admin-cover" id="admin-cover-dropzone">
+                    <svg class="dropzone__icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+                      <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"></path>
+                    </svg>
+                    <span class="dropzone__text" id="admin-cover-dropzone-text">Arrastra una imagen aquí, o haz clic para elegirla</span>
+                    <input class="dropzone__input" id="admin-cover" type="file" accept="image/*" hidden />
+                  </label>
+                  <p class="admin-hint">Máximo 1 MB. Se sube junto con el proyecto.</p>
+                </div>
+
+                <div class="field">
+                  <label class="field__label" for="admin-gallery">Más fotos (galería)</label>
+                  <div class="admin-current-image admin-current-image--gallery" id="admin-gallery-current" hidden>
+                    <div class="admin-gallery-grid" id="admin-gallery-grid"></div>
+                    <span class="admin-hint">Fotos actuales. Puedes quitar alguna una a una, o subir nuevas para añadirlas.</span>
+                  </div>
+                  <label class="dropzone" for="admin-gallery" id="admin-gallery-dropzone">
+                    <svg class="dropzone__icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+                      <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"></path>
+                    </svg>
+                    <span class="dropzone__text" id="admin-gallery-dropzone-text">Arrastra varias fotos aquí, o haz clic para elegirlas</span>
+                    <input class="dropzone__input" id="admin-gallery" type="file" accept="image/*" multiple hidden />
+                  </label>
+                  <p class="admin-hint">Opcional. Máximo 1 MB cada una.</p>
+                </div>
+              </div>
+
+              <div class="form-tabs__panel" id="tab-links" role="tabpanel" aria-labelledby="tab-btn-links" hidden>
+                <div class="field">
+                  <label class="field__label" for="admin-repo">Enlace a GitHub</label>
+                  <input class="field__control" id="admin-repo" type="url" placeholder="https://github.com/…" />
+                  <p class="admin-hint">El repositorio con el código del proyecto.</p>
+                  <p class="field__error"></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="admin-demo">Enlace a demo</label>
+                  <input class="field__control" id="admin-demo" type="url" placeholder="https://…" />
+                  <p class="admin-hint">Opcional, si el proyecto tiene una versión en vivo.</p>
+                  <p class="field__error"></p>
+                </div>
+              </div>
             </div>
-            <div class="field">
-              <label class="field__label" for="admin-status">Estado</label>
-              <select class="field__control" id="admin-status">
-                <option value="">Sin especificar</option>
-                <option value="finalizado">Finalizado</option>
-                <option value="en curso">En curso</option>
-                <option value="prototipo">Prototipo</option>
-              </select>
-              <p class="field__error"></p>
-            </div>
           </div>
 
-          <div class="field">
-            <label class="field__label" for="admin-date">Fecha de publicación</label>
-            <input class="field__control" id="admin-date" type="date" />
-            <p class="admin-hint">Se rellena con la fecha de hoy; puedes cambiarla si el proyecto es de antes.</p>
-            <p class="field__error"></p>
-          </div>
-
-          <label class="admin-checkbox">
-            <input type="checkbox" id="admin-featured" />
-            Destacar (tarjeta a doble ancho en escritorio)
-          </label>
-
-          <div class="field">
-            <label class="field__label" for="admin-tags">Tecnologías</label>
-            <input class="field__control" id="admin-tags" placeholder="Java, Kotlin, SQL" />
-            <p class="admin-hint">Separadas por comas.</p>
-          </div>
-
-          <div class="field">
-            <label class="field__label" for="admin-categories">Categorías</label>
-            <input class="field__control" id="admin-categories" placeholder="web, api" />
-            <p class="admin-hint">Separadas por comas (web, movil, api, escritorio, u otra nueva).</p>
-          </div>
-
-          <div class="field">
-            <label class="field__label" for="admin-highlights">Puntos destacados</label>
-            <textarea
-              class="field__control"
-              id="admin-highlights"
-              rows="4"
-              placeholder="Un logro por línea"
-            ></textarea>
-            <p class="admin-hint">Uno por línea.</p>
-          </div>
-
-          <h2 class="modal__section-title">Fotos del proyecto</h2>
-
-          <div class="field">
-            <label class="field__label" for="admin-cover">Imagen de portada</label>
-            <div class="admin-current-image" id="admin-cover-current" hidden>
-              <img id="admin-cover-current-img" alt="Portada actual" />
-              <span class="admin-hint">Imagen actual. Sube una nueva para reemplazarla.</span>
-            </div>
-            <input class="field__control" id="admin-cover" type="file" accept="image/*" />
-            <p class="admin-hint">Máximo 1 MB. Se sube junto con el proyecto.</p>
-          </div>
-
-          <div class="field">
-            <label class="field__label" for="admin-gallery">Más fotos (galería)</label>
-            <div class="admin-current-image" id="admin-gallery-current" hidden>
-              <span class="admin-hint">Fotos actuales. Sube nuevas para reemplazarlas todas.</span>
-            </div>
-            <input class="field__control" id="admin-gallery" type="file" accept="image/*" multiple />
-            <p class="admin-hint">Opcional, puedes elegir varias a la vez. Máximo 1 MB cada una.</p>
-          </div>
-
-          <h2 class="modal__section-title">Enlaces</h2>
-
-          <div class="admin-form-row">
-            <div class="field">
-              <label class="field__label" for="admin-repo">Enlace a GitHub</label>
-              <input class="field__control" id="admin-repo" type="url" placeholder="https://github.com/…" />
-              <p class="admin-hint">El repositorio con el código del proyecto.</p>
-              <p class="field__error"></p>
-            </div>
-            <div class="field">
-              <label class="field__label" for="admin-demo">Enlace a demo</label>
-              <input class="field__control" id="admin-demo" type="url" placeholder="https://…" />
-              <p class="admin-hint">Opcional, si el proyecto tiene una versión en vivo.</p>
-              <p class="field__error"></p>
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="field__label" for="admin-case-study">Enlace al caso de estudio</label>
-            <input class="field__control" id="admin-case-study" type="url" placeholder="https://…" />
-            <p class="admin-hint">Opcional.</p>
-            <p class="field__error"></p>
-          </div>
-
-          <button class="btn btn--primary btn--block" type="submit" id="project-submit">
+          <button class="btn btn--primary" type="submit" id="project-submit">
             Publicar proyecto
           </button>
         </form>
 
         <div class="admin-log" id="admin-log" role="status" aria-live="polite"></div>
+        </div>
       </section>
     </main>
 
@@ -234,7 +236,7 @@
     <div class="confirm-dialog" id="confirm-dialog" aria-hidden="true">
       <div class="confirm-dialog__backdrop" id="confirm-dialog-backdrop"></div>
       <div class="confirm-dialog__card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
-        <h2 class="admin-title" id="confirm-dialog-title">Eliminar proyecto</h2>
+        <h2 class="admin-title confirm-dialog__title" id="confirm-dialog-title">Eliminar proyecto</h2>
         <p id="confirm-dialog-message"></p>
         <div class="confirm-dialog__actions">
           <button class="btn btn--ghost" type="button" id="confirm-dialog-cancel">Cancelar</button>
@@ -243,6 +245,7 @@
       </div>
     </div>
 
+    <script src="js/vendor/flatpickr.min.js"></script>
     <script type="module" src="js/admin/main-admin.js"></script>
   </body>
 </html>

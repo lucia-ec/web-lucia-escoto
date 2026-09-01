@@ -123,6 +123,33 @@ export function renderProjectList({
     const row = el('tr', 'project-table__row');
 
     const titleCell = el('td', 'project-table__title-cell');
+    titleCell.appendChild(document.createTextNode(project.title));
+    row.appendChild(titleCell);
+
+    const actionsCell = el('td', 'project-table__actions-cell');
+    const actions = el('div', 'project-table__actions');
+
+    const editButton = el('button', 'icon-btn icon-btn--edit');
+    editButton.type = 'button';
+    editButton.setAttribute('aria-label', `Editar "${project.title}"`);
+    editButton.appendChild(iconSvg(EDIT_PATH));
+    editButton.addEventListener('click', () => onEdit(project));
+    actions.appendChild(editButton);
+
+    const deleteButton = el('button', 'icon-btn icon-btn--delete');
+    deleteButton.type = 'button';
+    deleteButton.setAttribute('aria-label', `Eliminar "${project.title}"`);
+    deleteButton.appendChild(iconSvg(DELETE_PATH));
+    deleteButton.addEventListener('click', async () => {
+      deleteButton.disabled = true;
+      try {
+        await onDelete(project);
+      } finally {
+        deleteButton.disabled = false;
+      }
+    });
+    actions.appendChild(deleteButton);
+
     const starButton = el('button', 'icon-btn icon-btn--star');
     starButton.type = 'button';
     starButton.classList.toggle('is-featured', Boolean(project.featured));
@@ -141,33 +168,9 @@ export function renderProjectList({
         starButton.disabled = false;
       }
     });
-    titleCell.appendChild(starButton);
-    titleCell.appendChild(document.createTextNode(project.title));
-    row.appendChild(titleCell);
+    actions.appendChild(starButton);
 
-    const actionsCell = el('td', 'project-table__actions-cell');
-
-    const editButton = el('button', 'icon-btn icon-btn--edit');
-    editButton.type = 'button';
-    editButton.setAttribute('aria-label', `Editar "${project.title}"`);
-    editButton.appendChild(iconSvg(EDIT_PATH));
-    editButton.addEventListener('click', () => onEdit(project));
-    actionsCell.appendChild(editButton);
-
-    const deleteButton = el('button', 'icon-btn icon-btn--delete');
-    deleteButton.type = 'button';
-    deleteButton.setAttribute('aria-label', `Eliminar "${project.title}"`);
-    deleteButton.appendChild(iconSvg(DELETE_PATH));
-    deleteButton.addEventListener('click', async () => {
-      deleteButton.disabled = true;
-      try {
-        await onDelete(project);
-      } finally {
-        deleteButton.disabled = false;
-      }
-    });
-    actionsCell.appendChild(deleteButton);
-
+    actionsCell.appendChild(actions);
     row.appendChild(actionsCell);
     tableBody.appendChild(row);
   });

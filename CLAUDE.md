@@ -33,11 +33,11 @@ python3 scripts/admin-server.py
 ## Estado actual
 
 - El hero es un SVG de ondas animadas con efecto tipo LED (`css/animations.css`); las variantes en imagen y en vídeo están en `snapshots/`.
-- En la sección de contacto hay un hueco marcado con `data-placeholder="mascota"` (`.contact-mascota--placeholder` en `css/sections.css`) a la espera de la mascota definitiva. El vídeo de prueba está en `media/mascota.mp4`.
+- La sección de contacto ya no reserva hueco para una mascota (se quitó el placeholder); solo muestra los enlaces. El vídeo de prueba sigue sin usarse en `media/mascota.mp4`.
 - Los enlaces de contacto apuntan a github.com/lucia-ec; el de LinkedIn sigue con un usuario de ejemplo (`USUARIO-LINKEDIN`) pendiente de sustituir, igual que en los datos estructurados de `index.html`.
 
 ## Convenciones
 
 - Nomenclatura BEM en las clases (`bloque__elemento--modificador`).
 - Comentarios y textos en español.
-- Sin librerías externas: iconos SVG en línea, gráficos del dashboard construidos a mano con SVG.
+- Iconos SVG en línea, gráficos del dashboard construidos a mano con SVG. La única librería externa es Flatpickr (`js/vendor/`, `css/vendor/`), guardada localmente en el proyecto para el selector de fecha del panel de administración — no se carga desde ningún CDN.
