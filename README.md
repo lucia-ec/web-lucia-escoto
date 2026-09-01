@@ -1,62 +1,69 @@
 # Web personal — Lucía Escoto Castro
 
-## Panel de administración (añadir proyectos sin editar código)
+Portafolio personal de Lucía Escoto Castro, Desarrolladora de Aplicaciones
+Multiplataforma. Es una web estática (sin frameworks, sin backend real): se
+publica tal cual en un sitio como GitHub Pages, y muestra los proyectos,
+las tecnologías usadas y una forma de contacto.
 
-En `admin.html` hay un panel para añadir proyectos desde un formulario. Todo
-se queda en tu ordenador: no hace falta cuenta de GitHub, ni repositorio, ni
-publicar nada en internet. El panel guarda los cambios directamente en tus
-propios archivos (`js/data/projects.js` y las imágenes en `assets/img/`).
+Va acompañada de un panel de administración de uso exclusivamente local,
+pensado para que Lucía pueda añadir, editar y borrar proyectos del
+portafolio sin tener que tocar código a mano.
 
-### Cómo arrancarlo
+## En qué consiste el proyecto
 
-El panel necesita un servidor especial, distinto del `python3 -m
-http.server` normal, porque además de servir la web tiene que poder
-**escribir** archivos cuando publicas un proyecto. Desde la carpeta del
-proyecto:
+Dos piezas conviven en el mismo repositorio:
 
-```bash
-python3 scripts/admin-server.py
+1. **La web pública** (`index.html`) — lo que ve cualquier visitante:
+   presentación, catálogo de proyectos con filtros y un pequeño panel de
+   estadísticas (cuántos proyectos, tecnologías y categorías hay), y un
+   formulario de contacto. Se aloja tal cual en GitHub Pages; no necesita
+   ningún servidor propio para funcionar una vez publicada.
+
+2. **El panel de administración** (`admin.html`) — una herramienta privada,
+   que solo funciona en el ordenador de Lucía, para gestionar el contenido
+   de los proyectos (añadir nuevos, editar los existentes, marcarlos como
+   destacados o borrarlos) sin editar el código fuente. Va protegido con
+   una frase de paso y nunca se ejecuta en internet: es exclusivamente para
+   uso personal, no para visitantes de la web.
+
+## Partes del proyecto
+
+```
+index.html          → la web pública
+admin.html           → el panel de administración (uso local)
+scripts/
+  admin-server.py     → servidor local que hace funcionar el panel
+                        (sirve las páginas y guarda los cambios en disco)
+js/
+  main.js             → arranca la web pública
+  data/projects.js    → los datos de todos los proyectos del portafolio
+  modules/            → piezas de la web pública (filtros, galería con
+                        zoom, panel de estadísticas, navegación, etc.)
+  admin/              → toda la lógica del panel de administración
+  vendor/             → Flatpickr, la única librería externa que se usa
+                        (selector de fechas del panel), guardada en el
+                        propio proyecto
+css/
+  tokens.css          → colores, tipografía y espaciados de toda la web
+  base.css, layout.css, components.css, sections.css, animations.css
+                      → estilos de la web pública, organizados por capas
+  admin.css           → estilos exclusivos del panel de administración
+  vendor/             → estilos de Flatpickr
+assets/
+  img/, icons/         → imágenes e iconos usados en la web pública
 ```
 
-Y abre <http://localhost:4180/admin.html>. Este mismo servidor también sirve
-la web normal en <http://localhost:4180/>, así que para trabajar en el
-proyecto no hace falta arrancar nada más.
+## Qué uso se le va a dar
 
-### Cada vez que lo uses
-
-1. Escribe la frase de paso que te dieron al construir este panel. Si la
-   pierdes, pide que se genere una nueva (implica cambiar un valor en
-   `js/admin/auth.js` y en `scripts/admin-server.py`, tienen que coincidir).
-2. Rellena el formulario. El identificador (id) se autorrellena desde el
-   título, pero puedes editarlo.
-3. En "Fotos del proyecto", adjunta la imagen de portada y, si quieres,
-   más fotos de galería.
-4. En "Enlaces", pon como mínimo el enlace a GitHub del proyecto (el
-   repositorio donde vive su código de verdad — esta web nunca guarda el
-   código, solo el enlace y las capturas).
-5. Pulsa "Publicar proyecto". En un segundo queda guardado en disco; recarga
-   la web para verlo en el portafolio.
-
-### Qué tan seguro es esto, en realidad
-
-- El servidor (`scripts/admin-server.py`) solo escucha en `127.0.0.1` — tu
-  propio ordenador. Ningún otro dispositivo de tu red, ni internet, puede
-  alcanzarlo.
-- La frase de paso ahora sí la comprueba el servidor, no solo el navegador:
-  cada vez que el panel guarda algo, manda el hash de la frase de paso y el
-  servidor lo verifica antes de escribir ningún archivo. Sin el hash
-  correcto, rechaza la petición.
-- Sigue sin ser una caja fuerte inexpugnable (el hash está en el código, y
-  alguien muy decidido podría intentar romperlo sin conexión), pero la
-  protección real, en la práctica, es que el servidor solo corre en tu
-  ordenador: quien no tenga acceso físico a tu máquina no puede llegar a él.
-- El panel solo **añade** proyectos. Para editar o borrar uno ya existente,
-  sigue editando `js/data/projects.js` a mano, como antes.
-
-### Publicar la web en internet más adelante
-
-Esto es un paso aparte, cuando decidas hacerlo — el panel de administración
-no depende de ello ni lo necesita para funcionar en tu ordenador. Cuando
-quieras que la web sea pública (por ejemplo con GitHub Pages), es tan
-sencillo como subir esta carpeta tal cual a un repositorio; el panel se
-queda funcionando igual en local para seguir añadiendo proyectos después.
+- La web pública se publica en internet (GitHub Pages) para que cualquiera
+  pueda ver el portafolio de proyectos.
+- El panel de administración es una herramienta de trabajo diario: cada vez
+  que Lucía termina un proyecto nuevo, lo da de alta ahí (título,
+  descripción, tecnologías, fotos y enlaces), y los cambios quedan
+  guardados en los propios archivos del repositorio (`js/data/projects.js`
+  y las imágenes en `assets/img/`). Después, para que esos cambios se vean
+  también en la web pública, hace falta subirlos a GitHub (el panel no
+  publica nada por sí mismo; solo modifica los archivos locales).
+- El panel corre siempre en local (`http://localhost:4180`) y nunca se
+  expone a internet: eso es justo lo que lo mantiene privado, aunque el
+  código del proyecto sea público en GitHub.
