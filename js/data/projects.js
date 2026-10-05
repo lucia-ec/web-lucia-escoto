@@ -52,91 +52,36 @@
 export const projects = [
   /* ▲ ANCLA-ADMIN: no borrar esta línea. Aquí inserta el panel los proyectos nuevos. */
   {
-    id: 'gestor-aulas-ies',
-    title: 'AulaViva',
-    tagline:
-      'Reserva de aulas y equipos de un centro educativo, sin hojas de cálculo.',
-    description:
-      'AulaViva nació de un problema real del instituto: la reserva de aulas de informática y carros de portátiles se llevaba en una hoja de cálculo compartida que se pisaba constantemente. La aplicación de escritorio centraliza el calendario de reservas, valida los solapamientos en el momento de guardar y deja registro de quién reservó qué. El profesorado consulta la disponibilidad por franja horaria y confirma en dos clics; el equipo directivo obtiene un informe mensual de uso por departamento. La capa de acceso a datos usa sentencias preparadas y el esquema impone la integridad con claves foráneas y una restricción de exclusión temporal, de modo que dos reservas nunca pueden ocupar la misma aula en la misma franja.',
-    role: 'Desarrollo completo: análisis, base de datos e interfaz',
-    year: 2026,
-    /* REEMPLAZAR con la fecha real de publicación */
-    date: '2026-05-20',
-    status: 'finalizado',
-    featured: true,
-    tags: ['Java', 'JavaFX', 'MySQL', 'JDBC', 'Scene Builder'],
-    categories: ['escritorio'],
-    cover: 'assets/img/proyecto-1.png',
-    gallery: ['assets/img/proyecto-1-a.png', 'assets/img/proyecto-1-b.png'],
-    highlights: [
-      'Detección de solapamientos resuelta en la base de datos, no en la interfaz: el conflicto es imposible aunque haya dos usuarios guardando a la vez.',
-      'Consultas parametrizadas con JDBC en toda la capa de datos, sin concatenación de cadenas.',
-      'Informe mensual de ocupación exportable a CSV para el equipo directivo.',
-    ],
-    links: {
-      demo: '',
-      repo: 'https://github.com/USUARIO-GITHUB/aulaviva',
-      caseStudy: '',
-    },
-  },
-  {
-    id: 'inventario-nebrimatica',
-    title: 'Panel de inventario',
-    tagline:
-      'Intranet para dar de alta, buscar y auditar el material de una empresa.',
-    description:
-      'Proyecto desarrollado durante las prácticas en Nebrimática. Sustituye el control manual del material por una intranet donde cada equipo tiene ficha, historial de asignaciones y estado. La búsqueda filtra por sede, tipo de equipo y estado sin recargar la página, y el listado se pagina en servidor para que la tabla siga siendo rápida con miles de registros. Toda la entrada de usuario se valida en el servidor antes de tocar la base de datos y se escapa al imprimirla en la plantilla. Trabajé con el equipo en las revisiones de código y documenté el despliegue para que otra persona pudiera levantar el entorno desde cero.',
-    role: 'Desarrollo front-end e integración con la API interna',
-    year: 2026,
-    /* REEMPLAZAR con la fecha real de publicación */
-    date: '2026-02-10',
-    status: 'finalizado',
-    featured: false,
-    tags: ['HTML', 'CSS', 'JavaScript', 'PHP', 'MySQL'],
-    categories: ['web', 'api'],
-    cover: 'assets/img/proyecto-2.png',
-    gallery: ['assets/img/proyecto-2-a.png'],
-    highlights: [
-      'Filtrado en cliente con paginación en servidor: la tabla responde igual con 50 registros que con 5.000.',
-      'Validación y escapado en servidor de todos los campos del formulario de alta.',
-      'Documentación de despliegue escrita para que el entorno se levante sin ayuda.',
-    ],
-    links: {
-      demo: '',
-      repo: '',
-      caseStudy: '',
-    },
-  },
-  {
-    "id": "rutas-accesibles",
-    "title": "Ruta Abierta",
-    "tagline": "App móvil que marca qué tramos de una ciudad son accesibles en silla de ruedas.",
-    "description": "Prototipo funcional de una aplicación Android que permite a cualquier persona señalar barreras arquitectónicas —un bordillo sin rebaje, una obra, un ascensor averiado— y consultar las que otras personas han marcado antes. Los datos se guardan en local con Room para que la app siga siendo útil sin cobertura y se sincronizan cuando vuelve la conexión. Ahora mismo está en desarrollo: el registro de incidencias y el mapa funcionan, y el siguiente paso es la validación comunitaria de los avisos para que no se acumulen marcas obsoletas.",
-    "role": "Desarrollo Android y diseño de la interfaz",
-    "year": 2026,
-    "date": "2026-07-01",
-    "status": "en curso",
-    "featured": false,
+    "id": "escada-web",
+    "title": "ESCADA-web",
+    "tagline": "Landing perfume ESCADA",
+    "description": "Landing de maqueta ficticia para el Eau de Parfum ESCADA. HTML, CSS y JS estándar: sin dependencias de build ni de CDN.\nTodos los datos son ficticios",
+    "status": "finalizado",
+    "featured": true,
     "tags": [
-      "Kotlin",
-      "Android",
-      "Room",
-      "Retrofit"
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "Canvas 2D",
+      "WebGL",
+      "Blender",
+      "Python"
     ],
     "categories": [
-      "movil"
+      "web"
     ],
-    "cover": "assets/img/proyecto-3.png",
-    "gallery": [],
-    "highlights": [
-      "Funciona sin conexión: Room como fuente de verdad local y sincronización diferida.",
-      "Interfaz pensada desde la accesibilidad, con áreas táctiles grandes y contraste alto."
+    "cover": "assets/img/escada-web-cover.jpg",
+    "gallery": [
+      "assets/img/escada-web-1.jpg",
+      "assets/img/escada-web-2.png",
+      "assets/img/escada-web-3.jpg",
+      "assets/img/escada-web-4.jpg"
     ],
     "links": {
       "demo": "",
-      "repo": "https://github.com/USUARIO-GITHUB/ruta-abierta",
-      "caseStudy": ""
-    }
+      "repo": "https://github.com/lucia-ec/escada-web"
+    },
+    "date": "2026-10-05"
   },
 ];
 

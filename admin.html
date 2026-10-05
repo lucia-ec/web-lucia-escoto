@@ -178,6 +178,13 @@
                       <button class="btn btn--ghost btn--danger-text" type="button" id="admin-cover-remove">Quitar portada</button>
                     </div>
                   </div>
+                  <div class="admin-current-image" id="admin-cover-new" hidden>
+                    <img id="admin-cover-new-img" alt="Vista previa de la nueva portada" />
+                    <div class="admin-current-image__info">
+                      <span class="admin-hint" id="admin-cover-new-name"></span>
+                      <button class="btn btn--ghost btn--danger-text" type="button" id="admin-cover-new-remove">Quitar</button>
+                    </div>
+                  </div>
                   <label class="dropzone" for="admin-cover" id="admin-cover-dropzone">
                     <svg class="dropzone__icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
                       <path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"></path>
@@ -193,6 +200,10 @@
                   <div class="admin-current-image admin-current-image--gallery" id="admin-gallery-current" hidden>
                     <div class="admin-gallery-grid" id="admin-gallery-grid"></div>
                     <span class="admin-hint">Fotos actuales. Puedes quitar alguna una a una, o subir nuevas para añadirlas.</span>
+                  </div>
+                  <div class="admin-current-image admin-current-image--gallery" id="admin-gallery-new" hidden>
+                    <div class="admin-gallery-grid" id="admin-gallery-new-grid"></div>
+                    <span class="admin-hint">Fotos nuevas, aún sin guardar. Puedes seguir añadiendo más o quitar alguna.</span>
                   </div>
                   <label class="dropzone" for="admin-gallery" id="admin-gallery-dropzone">
                     <svg class="dropzone__icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">

@@ -12,6 +12,7 @@
    ============================================================================ */
 
 import { checkPassphrase, sha256Hex } from './auth.js';
+import { compressImageToLimit } from './compressImage.js';
 import { fetchProjectsFile, saveProjectsFile, uploadImageFile } from './localAdmin.js';
 import {
   slugify,
@@ -52,33 +53,78 @@ let passphraseHash = '';
 let coverRemoved = false;
 let currentGalleryPaths = [];
 
+const REMOVE_ICON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
+
+function buildGalleryThumb(src, removeLabel, onRemove) {
+  const thumb = document.createElement('div');
+  thumb.className = 'admin-gallery-thumb';
+
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = '';
+  thumb.appendChild(img);
+
+  const removeButton = document.createElement('button');
+  removeButton.type = 'button';
+  removeButton.className = 'admin-gallery-thumb__remove';
+  removeButton.setAttribute('aria-label', removeLabel);
+  removeButton.innerHTML = REMOVE_ICON;
+  removeButton.addEventListener('click', onRemove);
+  thumb.appendChild(removeButton);
+
+  return thumb;
+}
+
 function renderGalleryGrid() {
   const grid = $('#admin-gallery-grid');
   grid.replaceChildren();
   currentGalleryPaths.forEach((src, index) => {
-    const thumb = document.createElement('div');
-    thumb.className = 'admin-gallery-thumb';
-
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = '';
-    thumb.appendChild(img);
-
-    const removeButton = document.createElement('button');
-    removeButton.type = 'button';
-    removeButton.className = 'admin-gallery-thumb__remove';
-    removeButton.setAttribute('aria-label', `Quitar foto ${index + 1} de la galería`);
-    removeButton.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
-    removeButton.addEventListener('click', () => {
-      currentGalleryPaths.splice(index, 1);
-      renderGalleryGrid();
-    });
-    thumb.appendChild(removeButton);
-
-    grid.appendChild(thumb);
+    grid.appendChild(
+      buildGalleryThumb(src, `Quitar foto ${index + 1} de la galería`, () => {
+        currentGalleryPaths.splice(index, 1);
+        renderGalleryGrid();
+      })
+    );
   });
   $('#admin-gallery-current').hidden = currentGalleryPaths.length === 0;
+}
+
+/* Archivos elegidos pero aún sin subir. La galería los acumula entre
+   selecciones (el <input> se vacía tras cada una); la portada es uno solo.
+   Las vistas previas usan URLs de objeto, que se liberan al repintar. */
+let pendingCoverFile = null;
+let pendingGalleryFiles = [];
+let pendingPreviewUrls = [];
+
+function previewUrl(file) {
+  const url = URL.createObjectURL(file);
+  pendingPreviewUrls.push(url);
+  return url;
+}
+
+function renderPendingGallery() {
+  pendingPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+  pendingPreviewUrls = [];
+  const grid = $('#admin-gallery-new-grid');
+  grid.replaceChildren();
+  pendingGalleryFiles.forEach((file, index) => {
+    grid.appendChild(
+      buildGalleryThumb(previewUrl(file), `Quitar ${file.name}`, () => {
+        pendingGalleryFiles.splice(index, 1);
+        renderPendingGallery();
+      })
+    );
+  });
+  $('#admin-gallery-new').hidden = pendingGalleryFiles.length === 0;
+  renderPendingCover();
+}
+
+function renderPendingCover() {
+  $('#admin-cover-new').hidden = !pendingCoverFile;
+  if (!pendingCoverFile) return;
+  $('#admin-cover-new-img').src = previewUrl(pendingCoverFile);
+  $('#admin-cover-new-name').textContent = pendingCoverFile.name;
 }
 
 $('#admin-cover-remove').addEventListener('click', () => {
@@ -241,12 +287,17 @@ FORM_TABS.forEach((tab) => {
 /* ---------------------------------------------------------------------
    Arrastrar y soltar imágenes sobre las cajas de "Imágenes"
    --------------------------------------------------------------------- */
-function setupDropzone(dropzoneId, inputId, textId, defaultText) {
+function setupDropzone(dropzoneId, inputId, textId, defaultText, onSelect) {
   const dropzone = $(dropzoneId);
   const input = $(inputId);
   const textNode = $(textId);
 
   function updateText() {
+    if (onSelect) {
+      onSelect([...input.files]);
+      input.value = '';
+      return;
+    }
     const files = input.files;
     if (!files || files.length === 0) {
       textNode.textContent = defaultText;
@@ -288,14 +339,29 @@ const coverDropzone = setupDropzone(
   '#admin-cover-dropzone',
   '#admin-cover',
   '#admin-cover-dropzone-text',
-  'Arrastra una imagen aquí, o haz clic para elegirla'
+  'Arrastra una imagen aquí, o haz clic para elegirla',
+  (files) => {
+    if (files.length === 0) return;
+    pendingCoverFile = files[0];
+    renderPendingCover();
+  }
 );
 const galleryDropzone = setupDropzone(
   '#admin-gallery-dropzone',
   '#admin-gallery',
   '#admin-gallery-dropzone-text',
-  'Arrastra varias fotos aquí, o haz clic para elegirlas'
+  'Arrastra varias fotos aquí, o haz clic para elegirlas',
+  (files) => {
+    if (files.length === 0) return;
+    pendingGalleryFiles.push(...files);
+    renderPendingGallery();
+  }
 );
+
+$('#admin-cover-new-remove').addEventListener('click', () => {
+  pendingCoverFile = null;
+  renderPendingCover();
+});
 
 /* ---------------------------------------------------------------------
    Formulario: modo añadir / modo editar
@@ -315,8 +381,9 @@ function resetFormToAddMode() {
   currentGalleryPaths = [];
   renderGalleryGrid();
   dateInputPicker.setDate(new Date(), false);
-  coverDropzone.updateText();
-  galleryDropzone.updateText();
+  pendingCoverFile = null;
+  pendingGalleryFiles = [];
+  renderPendingGallery();
   showTab('general');
 }
 
@@ -347,8 +414,9 @@ function openEditForm(project) {
   $('#admin-categories').value = values.categories;
   $('#admin-demo').value = values.links.demo;
   $('#admin-repo').value = values.links.repo;
-  coverDropzone.updateText();
-  galleryDropzone.updateText();
+  pendingCoverFile = null;
+  pendingGalleryFiles = [];
+  renderPendingGallery();
   showTab('general');
 
   coverRemoved = false;
@@ -443,8 +511,11 @@ $('#project-form').addEventListener('submit', async (event) => {
       return;
     }
 
-    const coverFile = $('#admin-cover').files[0] || null;
-    const galleryFiles = [...$('#admin-gallery').files];
+    log('Comprobando el peso de las imágenes…');
+    const coverFile = await compressImageToLimit(pendingCoverFile, MAX_IMAGE_BYTES);
+    const galleryFiles = await Promise.all(
+      pendingGalleryFiles.map((file) => compressImageToLimit(file, MAX_IMAGE_BYTES))
+    );
     assertFileSize(coverFile, 'La imagen de portada');
     galleryFiles.forEach((file, index) =>
       assertFileSize(file, `La imagen de galería nº ${index + 1}`)
